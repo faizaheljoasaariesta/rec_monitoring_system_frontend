@@ -5,6 +5,7 @@ import type { RouteObject } from 'react-router-dom';
 import PublicRoute from '@/layout/PublicRoute';
 
 import Dashboard from '@/pages/Dasboard';
+import Product from '@/pages/Product';
 
 const routes: RouteObject[] = [
   {
@@ -12,6 +13,14 @@ const routes: RouteObject[] = [
     element: (
       <PublicRoute>
         <Dashboard />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/product',
+    element: (
+      <PublicRoute>
+        <Product />
       </PublicRoute>
     ),
   },

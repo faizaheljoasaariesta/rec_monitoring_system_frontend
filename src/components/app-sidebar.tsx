@@ -27,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Separator } from "./ui/separator"
 
 const data = {
   user: {
@@ -37,7 +38,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
@@ -47,7 +48,7 @@ const data = {
     },
     {
       title: "Product",
-      url: "#",
+      url: "/product",
       icon: IconDeviceComputerCamera,
     },
     {
@@ -150,13 +151,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-10!"
             >
-              <a href="#">
+              <a href="/dashboard">
                 <img src="/logo.png" className="size-40!"/>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      <Separator />
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />

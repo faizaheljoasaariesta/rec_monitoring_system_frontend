@@ -1,5 +1,8 @@
 import type { AxiosResponse } from 'axios';
 import axiosInstance from '@/services/axiosInstance';
+import type {
+  ProductResponse,
+} from '@/types/report';
 
 export interface SummaryResponse {
   success: boolean;
@@ -12,9 +15,27 @@ export interface SummaryResponse {
   };
 }
 
-export const fetchSummary = async (): Promise<SummaryResponse['summary']> => {
+export const getProduct = async (): Promise<ProductResponse> => {
+  const response: AxiosResponse<ProductResponse> = await axiosInstance.get('/aa-iot/product');
+  return response.data;
+}
+
+export const fetchSummary = async (
+  start?: string, 
+  end?: string,
+  product?: string,
+): Promise<SummaryResponse['summary']> => {
   try {
-    const response: AxiosResponse<SummaryResponse> = await axiosInstance.get('/aa-iot/summary');
+    const params: Record<string, string> = {}
+    if (start) params.start = start
+    if (end) params.end = end
+    if (product) params.product = product
+
+    const response: AxiosResponse<SummaryResponse> = await axiosInstance.get(
+      "/aa-iot/summary",
+      { params }
+    );
+    
     if (response.data.success) {
       return response.data.summary;
     } else {

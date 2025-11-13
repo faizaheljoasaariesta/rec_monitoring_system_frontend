@@ -8,7 +8,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 
-import data from "../app/dashboard/data.json"
+// import data from "../app/dashboard/data.json"
 
 export default function Dashboard() {
   return (
@@ -30,7 +30,7 @@ export default function Dashboard() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
+              <DataTable />
             </div>
           </div>
         </div>

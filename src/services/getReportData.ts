@@ -6,7 +6,7 @@ export interface ReportDataResponse {
   filters: {
     start: string
     end: string
-    product: string
+    product?: string
   }
   data: {
     LOG_ID: number
@@ -20,18 +20,15 @@ export interface ReportDataResponse {
   }[]
 }
 
-/**
- * Get AA-IoT filtered report data
- * Example: /aa-iot/filter?start=2025-10-01&end=2025-10-31
- */
 export const getReportData = async (
   start: string,
-  end: string
+  end: string,
+  product?: string
 ): Promise<ReportDataResponse> => {
   try {
     const response = await axiosInstance.get<ReportDataResponse>(
       `/aa-iot/filter`,
-      { params: { start, end } }
+      { params: { start, end, product } }
     )
     return response.data
   } catch (error: any) {

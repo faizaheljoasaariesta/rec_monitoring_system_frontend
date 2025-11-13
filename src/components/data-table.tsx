@@ -130,7 +130,6 @@ export const schema = z.object({
   TEST_DATETIME: z.string(),
 })
 
-// Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {
   const { attributes, listeners } = useSortable({
     id,
@@ -243,7 +242,16 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Test Date",
     cell: ({ row }) => (
       <div className="text-sm">
-        {new Date(row.original.TEST_DATETIME).toLocaleString()}
+        {new Date(row.original.TEST_DATETIME).toLocaleString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+          timeZone: "UTC",
+        })}
       </div>
     ),
   },
@@ -309,9 +317,10 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 interface DataTableProps {
   startDate?: string
   endDate?: string
+  selectedProduct?: string
 }
 
-export function DataTable({ startDate, endDate }: DataTableProps) {
+export function DataTable({ startDate, endDate, selectedProduct }: DataTableProps) {
   const [data, setData] = React.useState<z.infer<typeof schema>[]>([])
   const [apiResponse, setApiResponse] = React.useState<ReportDataResponse | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
@@ -332,34 +341,98 @@ export function DataTable({ startDate, endDate }: DataTableProps) {
     useSensor(KeyboardSensor, {})
   )
 
-  // Fetch data from API
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        
-        // Default dates if not provided
-        const start = startDate || "2025-10-01"
-        const end = endDate || "2025-10-31"
-        
-        const response = await getReportData(start, end)
-        
-        if (response.success) {
-          setData(response.data)
-          setApiResponse(response)
-        } else {
-          setError("Failed to fetch data")
+  const fetchData = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const storedChartRange = localStorage.getItem("chart-range")
+      const storedProduct = localStorage.getItem("product")
+
+      let start: string | undefined
+      let end: string | undefined
+      let product: string | undefined
+
+      if (storedChartRange) {
+        const parsed = JSON.parse(storedChartRange)
+        start = parsed.start
+        end = parsed.end
+      }
+
+      if (storedProduct) {
+        product = storedProduct
+      }
+
+      if (!start || !end) {
+        const storedRange = localStorage.getItem("chart-time-range") || "30d"
+        const storedDateRange = localStorage.getItem("chart-date-range")
+
+        if (storedRange === "custom" && storedDateRange) {
+          const parsed = JSON.parse(storedDateRange)
+          if (parsed?.from && parsed?.to) {
+            start = new Date(parsed.from).toISOString().split("T")[0]
+            end = new Date(parsed.to).toISOString().split("T")[0]
+          }
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred while fetching data")
-      } finally {
-        setIsLoading(false)
+
+        if (!start || !end) {
+          const now = new Date()
+          let days = 30
+          if (storedRange === "7d") days = 7
+          if (storedRange === "90d") days = 90
+
+          const endDate = now.toISOString().split("T")[0]
+          const startDate = new Date(now)
+          startDate.setDate(startDate.getDate() - days)
+          start = startDate.toISOString().split("T")[0]
+          end = endDate
+        }
+      }
+      
+      const response = await getReportData(start, end, product)
+      
+      if (response.success) {
+        setData(response.data)
+        setApiResponse(response)
+      } else {
+        setError("Failed to fetch data")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred while fetching data")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  React.useEffect(() => {
+    fetchData()
+
+    const handleStorage = (e: StorageEvent) => {
+      if (
+        e.key === "chart-range" ||
+        e.key === "chart-time-range" ||
+        e.key === "chart-date-range" ||
+        e.key === "product"
+      ) {
+        fetchData()
       }
     }
 
-    fetchData()
-  }, [startDate, endDate])
+    // untuk event manual antar-komponen (tab aktif)
+    const handleCustomEvent = () => {
+      fetchData()
+    }
+
+    window.addEventListener("storage", handleStorage)
+    window.addEventListener("chart-range-updated", handleCustomEvent)
+    window.addEventListener("product-updated", handleCustomEvent)
+
+    return () => {
+      window.removeEventListener("storage", handleStorage)
+      window.removeEventListener("chart-range-updated", handleCustomEvent)
+      window.removeEventListener("product-updated", handleCustomEvent)
+    }
+  }, [startDate, endDate, selectedProduct])
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ LOG_ID }) => LOG_ID) || [],
@@ -402,21 +475,6 @@ export function DataTable({ startDate, endDate }: DataTableProps) {
     }
   }
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="w-full flex flex-col gap-6">
-        <div className="flex items-center justify-center py-20">
-          <div className="flex flex-col items-center gap-4">
-            <IconLoader2 className="size-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading report data...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state
   if (error) {
     return (
       <div className="w-full flex flex-col gap-6 px-4 lg:px-6">
@@ -451,29 +509,33 @@ export function DataTable({ startDate, endDate }: DataTableProps) {
                 <IconChevronDown />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id.replace(/_/g, " ")}
-                    </DropdownMenuCheckboxItem>
+            {isLoading ? (
+              <IconLoader2 className="size-4 animate-spin text-muted-foreground" />
+            ) : (
+              <DropdownMenuContent align="end" className="w-56">
+                {table
+                  .getAllColumns()
+                  .filter(
+                    (column) =>
+                      typeof column.accessorFn !== "undefined" &&
+                      column.getCanHide()
                   )
-                })}
-            </DropdownMenuContent>
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id.replace(/_/g, " ")}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            )}
           </DropdownMenu>
           <Button variant="outline" size="sm">
             <IconPlus />
@@ -668,7 +730,16 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 <Label htmlFor="test-datetime">Test Date</Label>
                 <Input 
                   id="test-datetime" 
-                  defaultValue={new Date(item.TEST_DATETIME).toLocaleString()} 
+                  defaultValue={new Date(item.TEST_DATETIME).toLocaleString("en-US", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true,
+                                timeZone: "UTC",
+                              })}
                   disabled
                 />
               </div>

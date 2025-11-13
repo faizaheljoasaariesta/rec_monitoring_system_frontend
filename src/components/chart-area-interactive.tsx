@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, Bar, BarChart } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, Bar, BarChart, Line, LineChart, LabelList } from "recharts"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   type ChartConfig,
@@ -36,12 +35,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
-import { Calendar as CalendarIcon, BarChart3, LineChart, Layers } from "lucide-react"
+import { Calendar as CalendarIcon, BarChart3, LineChart as LineChartIcon, Layers } from "lucide-react"
 import { type DateRange } from "react-day-picker"
 
 import { getSummaryDaily } from "@/services/aaIotService"
+import { getProduct } from "@/services/api/report"
 import { Calendar } from "@/components/ui/calendar"
-import { Combobox } from "./combo-box"
+import { Combobox, type ComboboxItem } from "./combo-box"
 
 export const description = "An interactive area chart"
 
@@ -60,49 +60,30 @@ interface ChartData {
 
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("90d")
+  const [timeRange, setTimeRange] = React.useState("30d")
   const [chartData, setChartData] = React.useState<ChartData[]>([])
+  const [productList, setProductList] = React.useState<ComboboxItem[]>([])
+  const [selectedProduct, setSelectedProduct] = React.useState("")
   const [loading, setLoading] = React.useState(false)
   const [openCalendar, setOpenCalendar] = React.useState(false)
   const [openChartStyle, setOpenChartStyle] = React.useState(false)
   const [chartType, setChartType] = React.useState<"area" | "line" | "tooltip">("area")
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
+  const [filterChart, setFilterChart] = React.useState("Total All Test")
 
   React.useEffect(() => {
     if (isMobile) setTimeRange("7d")
   }, [isMobile])
 
   React.useEffect(() => {
-    const fetchData = async () => {
+    const fetchProduct = async () => {
       setLoading(true)
       try {
-        let start: string
-        let end: string
-
-        if (timeRange === "custom" && dateRange?.from && dateRange?.to) {
-          start = dateRange.from.toISOString().split("T")[0]
-          end = dateRange.to.toISOString().split("T")[0]
-        } else {
-          const referenceDate = new Date()
-          let daysToSubtract = 90
-          if (timeRange === "30d") daysToSubtract = 30
-          else if (timeRange === "7d") daysToSubtract = 7
-
-          const endDate = referenceDate.toISOString().split("T")[0]
-          const startDate = new Date(referenceDate)
-          startDate.setDate(startDate.getDate() - daysToSubtract)
-          start = startDate.toISOString().split("T")[0]
-          end = endDate
-        }
-
-        const response = await getSummaryDaily(start, end)
-        const formatted = response.data.map((item: any) => ({
-          date: new Date(item.test_date).toISOString().split("T")[0],
-          rateOK: item.total_ok,
-          rateNG: item.total_ng,
-          rateRetry: item.total_retry,
-        }))
-        setChartData(formatted)
+        const response = await getProduct()
+        const products = response.data.product
+          .filter(Boolean)
+          .map((p) => ({ value: p as string, label: p as string }))
+        setProductList(products)
       } catch (err) {
         console.error("Failed to fetch chart data:", err)
       } finally {
@@ -110,8 +91,140 @@ export function ChartAreaInteractive() {
       }
     }
 
-    fetchData()
-  }, [timeRange, dateRange])
+    fetchProduct()
+  }, [])
+
+  // React.useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true)
+  //     try {
+  //       let start: string
+  //       let end: string
+
+  //       if (timeRange === "custom" && dateRange?.from && dateRange?.to) {
+  //         start = dateRange.from.toISOString().split("T")[0]
+  //         end = dateRange.to.toISOString().split("T")[0]
+  //       } else {
+  //         const now = new Date()
+  //         let days = 30
+  //         if (timeRange === "7d") days = 7
+  //         if (timeRange === "90d") days = 90
+
+  //         const endDate = now.toISOString().split("T")[0]
+  //         const startDate = new Date(now)
+  //         startDate.setDate(startDate.getDate() - days)
+  //         start = startDate.toISOString().split("T")[0]
+  //         end = endDate
+  //       }
+
+  //       localStorage.setItem("chart-time-range", timeRange)
+  //       if (dateRange)
+  //         localStorage.setItem("chart-date-range", JSON.stringify(dateRange))
+  //       localStorage.setItem("chart-range", JSON.stringify({ start, end }))
+
+  //       window.dispatchEvent(new Event("chart-range-updated"))
+
+  //       const response = await getSummaryDaily(start, end, selectedProduct)
+  //       console.log(start, end, selectedProduct)
+  //       const formatted = response.data.map((item: any) => ({
+  //         date: new Date(item.test_date).toISOString().split("T")[0],
+  //         rateOK: item.total_ok,
+  //         rateNG: item.total_ng,
+  //         rateRetry: item.total_retry,
+  //       }))
+  //       setChartData(formatted)
+  //       console.log(chartData)
+  //     } catch (err) {
+  //       console.error("Failed to fetch chart data:", err)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+
+  //   fetchData()
+  // }, [timeRange, dateRange, selectedProduct])
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        let start: string;
+        let end: string;
+  
+        if (timeRange === "custom" && dateRange?.from && dateRange?.to) {
+          start = dateRange.from.toISOString().split("T")[0];
+          end = dateRange.to.toISOString().split("T")[0];
+        } else {
+          const now = new Date();
+          let days = 30;
+          if (timeRange === "7d") days = 7;
+          if (timeRange === "90d") days = 90;
+  
+          const endDate = now.toISOString().split("T")[0];
+          const startDate = new Date(now);
+          startDate.setDate(startDate.getDate() - days);
+  
+          start = startDate.toISOString().split("T")[0];
+          end = endDate;
+        }
+  
+        localStorage.setItem("chart-time-range", timeRange);
+        if (dateRange) localStorage.setItem("chart-date-range", JSON.stringify(dateRange));
+        localStorage.setItem("chart-range", JSON.stringify({ start, end }));
+  
+        window.dispatchEvent(new Event("chart-range-updated"));
+  
+        const response = await getSummaryDaily(start, end, selectedProduct);
+        const rawData = response.data;
+  
+        const generateDateRange = (startDate: string, endDate: string) => {
+          const dates = [];
+          const current = new Date(startDate);
+          const endD = new Date(endDate);
+          while (current <= endD) {
+            dates.push(current.toISOString().split("T")[0]);
+            current.setDate(current.getDate() + 1);
+          }
+          return dates;
+        };
+  
+        const allDates = generateDateRange(start, end);
+  
+        const dataMap = new Map(
+          rawData.map((item: any) => [
+            new Date(item.test_date).toISOString().split("T")[0],
+            item,
+          ])
+        );
+  
+        const filledData = allDates.map((date) => {
+          const item = dataMap.get(date);
+          return {
+            date,
+            rateOK: item ? item.total_ok : 0,
+            rateNG: item ? item.total_ng : 0,
+            rateRetry: item ? item.total_retry : 0,
+          };
+        });
+  
+        setChartData(filledData);
+      } catch (err) {
+        console.error("Failed to fetch chart data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, [timeRange, dateRange, selectedProduct, filterChart]);
+
+  const getFilteredDataKey = () => {
+    if (filterChart === "(NG) Test") return "rateNG"
+    if (filterChart === "(Retry) Test") return "rateRetry"
+    return false // null = Total All Test (tampilkan semua data)
+  }
+
+  const filteredDataKey = getFilteredDataKey()
 
   return (
     <Card className="@container/card">
@@ -119,7 +232,18 @@ export function ChartAreaInteractive() {
         {loading ? (
           <Skeleton className="h-5 w-20 rounded-full" />
         ) : (
-          <CardTitle>Total Test</CardTitle>
+          <div className="hidden md:flex">
+            <Select value={filterChart} onValueChange={setFilterChart}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Total All Test">Total All Test</SelectItem>
+                <SelectItem value="(NG) Test">(NG) Test</SelectItem>
+                <SelectItem value="(Retry) Test">(Retry) Test</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         )}
         {loading ? (
           <Skeleton className="h-4 w-28 rounded-full" />
@@ -150,7 +274,12 @@ export function ChartAreaInteractive() {
             <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
           </ToggleGroup>
 
-          <Combobox />
+          <Combobox 
+            items={productList}
+            value={selectedProduct}
+            onChange={setSelectedProduct}
+            loading={loading}
+          />
 
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
@@ -209,7 +338,7 @@ export function ChartAreaInteractive() {
                 size="sm"
                 className="hidden items-center gap-2 h-9 rounded-md @[767px]/card:flex"
               >
-                <LineChart className="w-4 h-4" />
+                <LineChartIcon className="w-4 h-4" />
                 Chart Style
               </Button>
             </PopoverTrigger>
@@ -239,7 +368,7 @@ export function ChartAreaInteractive() {
                     setOpenChartStyle(false)
                   }}
                 >
-                  <LineChart className="w-4 h-4 mr-2" />
+                  <LineChartIcon className="w-4 h-4 mr-2" />
                   Line Chart
                 </Button>
                 <Button
@@ -268,6 +397,7 @@ export function ChartAreaInteractive() {
               <p>Loading...</p>
             </div>
           ) : chartType === "tooltip" ? (
+            // ========== BAR CHART ==========
             <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} />
               <XAxis
@@ -283,24 +413,30 @@ export function ChartAreaInteractive() {
                   })
                 }
               />
-              <Bar
-                dataKey="rateRetry"
-                stackId="a"
-                fill="var(--color-rateRetry)"
-                radius={[0, 0, 4, 4]}
-              />
-              <Bar
-                dataKey="rateNG"
-                stackId="a"
-                fill="var(--color-rateNG)"
-                radius={[0, 0, 0, 0]}
-              />
-              <Bar
-                dataKey="rateOK"
-                stackId="a"
-                fill="var(--color-rateOK)"
-                radius={[4, 4, 0, 0]}
-              />
+
+              {/* --- Dinamis Bar --- */}
+              {(
+                filteredDataKey
+                  ? [filteredDataKey]
+                  : ["rateRetry", "rateNG", "rateOK"]
+              ).map((key, index, arr) => (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  stackId="a"
+                  fill={`var(--color-${key})`}
+                  radius={
+                    arr.length === 1
+                      ? [4, 4, 4, 4]
+                      : index === 0
+                      ? [0, 0, 4, 4]
+                      : index === arr.length - 1
+                      ? [4, 4, 0, 0]
+                      : [0, 0, 0, 0]
+                  }
+                />
+              ))}
+
               <ChartTooltip
                 content={
                   <ChartTooltipContent
@@ -316,22 +452,18 @@ export function ChartAreaInteractive() {
                 defaultIndex={1}
               />
             </BarChart>
-          ) : (
+          ) : chartType === "area" ? (
+            // ========== AREA CHART ==========
             <AreaChart data={chartData}>
               <defs>
-                <linearGradient id="fillRateOK" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-rateOK)" stopOpacity={chartType === "area" ? 1 : 0} />
-                  <stop offset="95%" stopColor="var(--color-rateOK)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillRateNG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-rateNG)" stopOpacity={chartType === "area" ? 0.8 : 0} />
-                  <stop offset="95%" stopColor="var(--color-rateNG)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillRateRetry" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-rateRetry)" stopOpacity={chartType === "area" ? 0.8 : 0} />
-                  <stop offset="95%" stopColor="var(--color-rateRetry)" stopOpacity={0.1} />
-                </linearGradient>
+                {["rateOK", "rateNG", "rateRetry"].map((key) => (
+                  <linearGradient key={key} id={`fill${key}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={`var(--color-${key})`} stopOpacity={chartType === "area" ? 1 : 0} />
+                    <stop offset="95%" stopColor={`var(--color-${key})`} stopOpacity={0.1} />
+                  </linearGradient>
+                ))}
               </defs>
+
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="date"
@@ -360,28 +492,80 @@ export function ChartAreaInteractive() {
                   />
                 }
               />
-              <Area
-                dataKey="rateRetry"
-                type="natural"
-                fill="url(#fillRateRetry)"
-                stroke="var(--color-rateRetry)"
-                stackId="a"
-              />
-              <Area
-                dataKey="rateNG"
-                type="natural"
-                fill="url(#fillRateNG)"
-                stroke="var(--color-rateNG)"
-                stackId="a"
-              />
-              <Area
-                dataKey="rateOK"
-                type="natural"
-                fill="url(#fillRateOK)"
-                stroke="var(--color-rateOK)"
-                stackId="a"
-              />
+
+              {/* --- Dinamis Area --- */}
+              {(
+                filteredDataKey
+                  ? [filteredDataKey]
+                  : ["rateRetry", "rateNG", "rateOK"]
+              ).map((key) => (
+                <Area
+                  key={key}
+                  dataKey={key}
+                  type="natural"
+                  fill={`url(#fill${key})`}
+                  stroke={`var(--color-${key})`}
+                  strokeWidth={2}
+                  stackId="a"
+                />
+              ))}
             </AreaChart>
+          ) : (
+            // ========== LINE CHART ==========
+            <LineChart data={chartData}>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) =>
+                      new Date(value).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    }
+                    indicator="dot"
+                  />
+                }
+              />
+
+              {/* --- Dinamis Line --- */}
+              {(
+                filteredDataKey
+                  ? [filteredDataKey]
+                  : ["rateRetry", "rateNG", "rateOK"]
+              ).map((key) => (
+                <Line
+                  key={key}
+                  type="linear"
+                  dataKey={key}
+                  stroke={`var(--color-${key})`}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4 }}
+                >
+                  <LabelList
+                    position="top"
+                    offset={12}
+                    className="fill-foreground"
+                    fontSize={12}
+                  />
+                </Line>
+              ))}
+            </LineChart>
           )}
         </ChartContainer>
       </CardContent>

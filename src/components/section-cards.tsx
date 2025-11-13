@@ -23,19 +23,88 @@ export function SectionCards() {
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const loadData = async () => {
+    try {
+      setLoading(true)
+
+      const storedChartRange = localStorage.getItem("chart-range")
+      const storedProduct = localStorage.getItem('product')
+      let start: string | undefined
+      let end: string | undefined
+      let product: string | undefined
+
+      if (storedChartRange) {
+        const parsed = JSON.parse(storedChartRange)
+        start = parsed.start
+        end = parsed.end
+      }
+
+      if (storedProduct) {
+        product = storedProduct
+      }
+
+      if (!start || !end) {
+        const storedRange = localStorage.getItem("chart-time-range") || "30d"
+        const storedDateRange = localStorage.getItem("chart-date-range")
+
+        if (storedRange === "custom" && storedDateRange) {
+          const parsed = JSON.parse(storedDateRange)
+          if (parsed?.from && parsed?.to) {
+            start = new Date(parsed.from).toISOString().split("T")[0]
+            end = new Date(parsed.to).toISOString().split("T")[0]
+          }
+        }
+
+        if (!start || !end) {
+          const now = new Date()
+          let days = 30
+          if (storedRange === "7d") days = 7
+          if (storedRange === "90d") days = 90
+
+          const endDate = now.toISOString().split("T")[0]
+          const startDate = new Date(now)
+          startDate.setDate(startDate.getDate() - days)
+          start = startDate.toISOString().split("T")[0]
+          end = endDate
+        }
+      }
+
+      const result = await fetchSummary(start, end, product)
+      setSummary(result)
+    } catch (error) {
+      console.error("Failed to load summary:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const result = await fetchSummary()
-        setSummary(result)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading(false)
+    loadData()
+
+    const handleStorage = (e: StorageEvent) => {
+      if (
+        e.key === "chart-range" ||
+        e.key === "chart-time-range" ||
+        e.key === "chart-date-range" ||
+        e.key === "product"
+      ) {
+        loadData()
       }
     }
 
-    loadData()
+    const handleCustomEvent = () => {
+      loadData()
+    }
+
+    window.addEventListener("storage", handleStorage)
+    window.addEventListener("chart-range-updated", handleCustomEvent)
+    window.addEventListener("product-updated", handleCustomEvent)
+
+    return () => {
+      window.removeEventListener("storage", handleStorage)
+      window.removeEventListener("chart-range-updated", handleCustomEvent)
+      window.removeEventListener("product-updated", handleCustomEvent)
+    }
   }, [])
 
   const total_tests = summary?.total_tests ?? 0
@@ -127,7 +196,6 @@ export function SectionCards() {
         </CardFooter>
       </Card>
 
-      {/* Card: NG Rate */}
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>(NG) Rate</CardDescription>
@@ -165,7 +233,6 @@ export function SectionCards() {
         </CardFooter>
       </Card>
 
-      {/* Card: Retry Rate */}
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>(Retry) Rate</CardDescription>

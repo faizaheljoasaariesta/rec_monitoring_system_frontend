@@ -5,7 +5,7 @@ export interface SummaryDailyResponse {
   filters: {
     start: string
     end: string
-    product: string
+    product?: string
   }
   data: {
     test_date: string
@@ -16,17 +16,15 @@ export interface SummaryDailyResponse {
   }[]
 }
 
-/**
- * Get AA-IoT daily summary data with start and end date
- */
 export const getSummaryDaily = async (
   start: string,
-  end: string
+  end: string,
+  product?: string,
 ): Promise<SummaryDailyResponse> => {
   try {
     const response = await axiosInstance.get<SummaryDailyResponse>(
       `/aa-iot/summary/daily`,
-      { params: { start, end } }
+      { params: { start, end, product } }
     )
     return response.data
   } catch (error: any) {
