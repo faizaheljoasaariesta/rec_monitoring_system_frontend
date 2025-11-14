@@ -5,7 +5,8 @@ import type { RouteObject } from 'react-router-dom';
 import PublicRoute from '@/layout/PublicRoute';
 
 import Dashboard from '@/pages/Dasboard';
-import Product from '@/pages/Product';
+// import Product from '@/pages/Product';
+import Testing from '@/pages/Testing';
 
 const routes: RouteObject[] = [
   {
@@ -20,7 +21,7 @@ const routes: RouteObject[] = [
     path: '/product',
     element: (
       <PublicRoute>
-        <Product />
+        <Testing />
       </PublicRoute>
     ),
   },

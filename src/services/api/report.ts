@@ -20,6 +20,11 @@ export const getProduct = async (): Promise<ProductResponse> => {
   return response.data;
 }
 
+export const getProductList = async (): Promise<ProductResponse> => {
+  const response: AxiosResponse<ProductResponse> = await axiosInstance.get('/aa-iot/product-list');
+  return response.data;
+}
+
 export const fetchSummary = async (
   start?: string, 
   end?: string,

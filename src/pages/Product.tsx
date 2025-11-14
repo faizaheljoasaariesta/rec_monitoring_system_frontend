@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 // import { DatePicker } from "@/components/ui/date-picker"
 // import { DataTable } from "@/components/data-table"
-import { ProductTable } from "@/components/product-table"
+import { ProductTable } from "@/components/product-table-old"
 import { useState } from "react"
 
 export default function Product() {

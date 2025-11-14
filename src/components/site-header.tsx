@@ -36,7 +36,7 @@ export function SiteHeader() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="RG_AA_IOT">RG_AA_IOT</SelectItem>
-                <SelectItem value="RG_AIOT_IOT">RG_AIOT_IOT</SelectItem>
+                <SelectItem value="RG_AIQT_IOT">RG_AIOT_IOT</SelectItem>
                 <SelectItem value="RG_BIQT_IOT">RG_BIQT_IOT</SelectItem>
                 <SelectItem value="RG_DC_IOT">RG_DC_IOT</SelectItem>
                 <SelectItem value="RG_AIR">RG_AIR</SelectItem>
