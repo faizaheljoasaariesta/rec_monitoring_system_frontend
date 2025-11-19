@@ -12,7 +12,7 @@ import {
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
+  // IconUsers,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -42,8 +42,8 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "Analytic",
+      url: "/analytic",
       icon: IconChartBar,
     },
     {
@@ -51,11 +51,11 @@ const data = {
       url: "/product",
       icon: IconDeviceComputerCamera,
     },
-    {
-      title: "Operator",
-      url: "#",
-      icon: IconUsers,
-    },
+    // {
+    //   title: "Operator",
+    //   url: "#",
+    //   icon: IconUsers,
+    // },
   ],
   navClouds: [
     {

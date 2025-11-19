@@ -35,7 +35,7 @@ interface ComboboxProps {
 export function Combobox({
   items,
   value: externalValue,
-  placeholder = "Select product...",
+  placeholder = "All selected product...",
   onChange,
   loading = false,
 }: ComboboxProps) {

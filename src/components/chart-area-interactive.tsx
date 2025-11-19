@@ -67,7 +67,7 @@ export function ChartAreaInteractive() {
   const [loading, setLoading] = React.useState(false)
   const [openCalendar, setOpenCalendar] = React.useState(false)
   const [openChartStyle, setOpenChartStyle] = React.useState(false)
-  const [chartType, setChartType] = React.useState<"area" | "line" | "tooltip">("area")
+  const [chartType, setChartType] = React.useState<"area" | "line" | "tooltip">("tooltip")
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
   const [filterChart, setFilterChart] = React.useState("Total All Test")
 
@@ -78,6 +78,8 @@ export function ChartAreaInteractive() {
   React.useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true)
+      window.startTopLoading()
+
       try {
         const response = await getProduct()
         const products = response.data.product
@@ -88,6 +90,7 @@ export function ChartAreaInteractive() {
         console.error("Failed to fetch chart data:", err)
       } finally {
         setLoading(false)
+        window.stopTopLoading()
       }
     }
 
@@ -147,13 +150,22 @@ export function ChartAreaInteractive() {
   React.useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      window.startTopLoading();
+
+      const formatLocalDate = (d: Date) => {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      
       try {
         let start: string;
         let end: string;
   
         if (timeRange === "custom" && dateRange?.from && dateRange?.to) {
-          start = dateRange.from.toISOString().split("T")[0];
-          end = dateRange.to.toISOString().split("T")[0];
+          start = formatLocalDate(dateRange.from);
+          end = formatLocalDate(dateRange.to);
         } else {
           const now = new Date();
           let days = 30;
@@ -212,16 +224,17 @@ export function ChartAreaInteractive() {
         console.error("Failed to fetch chart data:", err);
       } finally {
         setLoading(false);
+        window.stopTopLoading();
       }
     };
   
     fetchData();
-  }, [timeRange, dateRange, selectedProduct, filterChart]);
+  }, [timeRange, dateRange, selectedProduct]);
 
   const getFilteredDataKey = () => {
     if (filterChart === "(NG) Test") return "rateNG"
     if (filterChart === "(Retry) Test") return "rateRetry"
-    return false // null = Total All Test (tampilkan semua data)
+    return false
   }
 
   const filteredDataKey = getFilteredDataKey()
@@ -324,6 +337,8 @@ export function ChartAreaInteractive() {
                   setDateRange(range)
                   if (range?.from && range?.to) {
                     setTimeRange("custom")
+                    console.log(range)
+                    console.log(dateRange)
                   }
                 }}
                 className="rounded-lg shadow-sm"
@@ -397,7 +412,6 @@ export function ChartAreaInteractive() {
               <p>Loading...</p>
             </div>
           ) : chartType === "tooltip" ? (
-            // ========== BAR CHART ==========
             <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} />
               <XAxis
@@ -414,7 +428,6 @@ export function ChartAreaInteractive() {
                 }
               />
 
-              {/* --- Dinamis Bar --- */}
               {(
                 filteredDataKey
                   ? [filteredDataKey]
@@ -453,7 +466,6 @@ export function ChartAreaInteractive() {
               />
             </BarChart>
           ) : chartType === "area" ? (
-            // ========== AREA CHART ==========
             <AreaChart data={chartData}>
               <defs>
                 {["rateOK", "rateNG", "rateRetry"].map((key) => (
@@ -493,7 +505,6 @@ export function ChartAreaInteractive() {
                 }
               />
 
-              {/* --- Dinamis Area --- */}
               {(
                 filteredDataKey
                   ? [filteredDataKey]
@@ -511,8 +522,7 @@ export function ChartAreaInteractive() {
               ))}
             </AreaChart>
           ) : (
-            // ========== LINE CHART ==========
-            <LineChart data={chartData}>
+            <LineChart data={chartData} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="date"
@@ -542,8 +552,7 @@ export function ChartAreaInteractive() {
                 }
               />
 
-              {/* --- Dinamis Line --- */}
-              {(
+              {/* {(
                 filteredDataKey
                   ? [filteredDataKey]
                   : ["rateRetry", "rateNG", "rateOK"]
@@ -563,6 +572,31 @@ export function ChartAreaInteractive() {
                     className="fill-foreground"
                     fontSize={12}
                   />
+                </Line>
+              ))} */}
+
+              {(
+                filteredDataKey
+                  ? [filteredDataKey]
+                  : ["rateRetry", "rateNG", "rateOK"]
+              ).map((key) => (
+                <Line
+                  key={key}
+                  type="linear"
+                  dataKey={key}
+                  stroke={`var(--color-${key})`}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4 }}
+                >
+                  {(key === "rateNG" || key === "rateOK" || filteredDataKey === "rateRetry") && (
+                    <LabelList
+                      position="top"
+                      offset={12}
+                      className="fill-foreground"
+                      fontSize={12}
+                    />
+                  )}
                 </Line>
               ))}
             </LineChart>

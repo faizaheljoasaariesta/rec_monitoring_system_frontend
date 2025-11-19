@@ -4,9 +4,9 @@ import type { RouteObject } from 'react-router-dom';
 // import PrivateRoute from '@/layout/PrivateRoute';
 import PublicRoute from '@/layout/PublicRoute';
 
-import Dashboard from '@/pages/Dasboard';
-// import Product from '@/pages/Product';
-import Testing from '@/pages/Testing';
+import Dashboard from '@/pages/Dashboard';
+import Product from '@/pages/Product';
+import Analytic from '@/pages/Analytic';
 
 const routes: RouteObject[] = [
   {
@@ -18,10 +18,18 @@ const routes: RouteObject[] = [
     ),
   },
   {
+    path: '/analytic',
+    element: (
+      <PublicRoute>
+        <Analytic />
+      </PublicRoute>
+    ),
+  },
+  {
     path: '/product',
     element: (
       <PublicRoute>
-        <Testing />
+        <Product />
       </PublicRoute>
     ),
   },

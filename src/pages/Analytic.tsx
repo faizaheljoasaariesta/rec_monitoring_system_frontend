@@ -1,12 +1,13 @@
+import { AnalyticTable } from "@/components/analytic-table"
 import { AppSidebar } from "@/components/app-sidebar"
-import { ProductTable } from "@/components/product-table"
+import AAChart from "@/components/chart-analytic"
 import { SiteHeader } from "@/components/site-header"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
 
-export default function Testing() {
+export default function Analytic() {
   return (
     <SidebarProvider
       style={
@@ -22,7 +23,8 @@ export default function Testing() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <ProductTable />
+              <AAChart />
+              <AnalyticTable />
             </div>
           </div>
         </div>
