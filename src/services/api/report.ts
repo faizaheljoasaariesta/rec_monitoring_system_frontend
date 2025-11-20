@@ -2,6 +2,7 @@ import type { AxiosResponse } from 'axios';
 import axiosInstance from '@/services/axiosInstance';
 import type {
   ProductResponse,
+  AnalyticResponse,
 } from '@/types/report';
 
 export interface SummaryResponse {
@@ -54,3 +55,15 @@ export const fetchSummary = async (
     }
   }
 };
+
+export const getAnalytic = async (
+  start?: string,
+  end?: string,
+): Promise<AnalyticResponse> => {
+  const params: Record<string, string> = {}
+  if (start) params.start = start
+  if (end) params.end = end
+
+  const response: AxiosResponse<AnalyticResponse> = await axiosInstance.get("/aa-iot/analytic", { params });
+  return response.data;
+}

@@ -7,11 +7,16 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
 import {
-  // BarChart,
+  Card,
+  CardAction,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card"
+import {
   Bar,
-  // LineChart,
   ComposedChart,
   Line,
   XAxis,
@@ -19,6 +24,17 @@ import {
   CartesianGrid,
   LabelList,
 } from "recharts";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { Calendar as CalendarIcon } from "lucide-react"
+
+import { Calendar } from "@/components/ui/calendar"
+
+import { type DateRange } from "react-day-picker"
 
 export interface MachineData {
   machine: string;
@@ -28,8 +44,8 @@ export interface MachineData {
   okYear: number;
   ngYear: number;
   retryYear: number;
-  rateRetry: number;      // daily
-  rateRetryYear: number;  // yearly
+  rateRetry: number;
+  rateRetryYear: number;
 }
 
 interface AAChartProps {
@@ -81,86 +97,132 @@ const AAChart: React.FC<AAChartProps> = ({
   loading = false,
   chartConfig = {},
 }) => {
+  const [openCalendar, setOpenCalendar] = React.useState(false)
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
+  const [timeRange, setTimeRange] = React.useState("30d")
+
   return (
-    <ChartContainer config={chartConfig} className="w-full h-[400px]">
-  {loading ? (
-    <div className="flex w-full h-full justify-center items-center gap-2">
-      <p>Loading...</p>
-    </div>
-  ) : (
-    <ComposedChart
-      data={data}
-      margin={{ top: 20, right: 50, bottom: 20, left: 20 }}
-    >
-      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+    <Card className="@container/card">
+      <CardHeader>
+        <CardTitle>Analytic Report</CardTitle>
+        <CardDescription>
+          <span className="hidden @[540px]/card:block">
+            Result report for 20 November 2025
+          </span>
+        </CardDescription>
+        <CardAction>
+        <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden items-center gap-2 h-9 rounded-md @[767px]/card:flex"
+              >
+                <CalendarIcon className="w-4 h-4" />
+                Calendar
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="p-2 w-auto"
+              align="end"
+            >
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={(range) => {
+                  setDateRange(range)
+                  if (range?.from && range?.to) {
+                    setTimeRange("custom")
+                  }
+                }}
+                className="rounded-lg shadow-sm"
+              />
+            </PopoverContent>
+          </Popover>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        <ChartContainer config={chartConfig} className="w-full h-[400px]">
+          {loading ? (
+            <div className="flex w-full h-full justify-center items-center gap-2">
+              <p>Loading...</p>
+            </div>
+          ) : (
+            <ComposedChart
+              data={data}
+              margin={{ top: 20, right: 0, bottom: 0, left: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-      <XAxis
-        dataKey="machine"
-        tickLine={false}
-        axisLine={false}
-        tickMargin={8}
-      />
+              <XAxis
+                dataKey="machine"
+                tickLine={true}
+                axisLine={true}
+                tickMargin={8}
+              />
 
-      <YAxis
-        yAxisId="left"
-        label={{ value: "Counts", angle: -90, position: "insideLeft" }}
-      />
+              <YAxis
+                yAxisId="left"
+                label={{ value: "Counts", angle: -90, position: "insideLeft" }}
+              />
 
-      <YAxis
-        yAxisId="right"
-        orientation="right"
-        label={{ value: "Rate (%)", angle: 90, position: "insideRight" }}
-        domain={[0, 4]}
-      />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                label={{ value: "Rate (%)", angle: 90, position: "insideRight" }}
+              />
 
-      {/* Bars */}
-      <Bar yAxisId="left" dataKey="ok" stackId="a" fill="var(--primary)">
-        <LabelList dataKey="ok" position="inside" fill="white" fontWeight="bold" />
-      </Bar>
-      <Bar yAxisId="left" dataKey="retry" stackId="a" fill="red">
-        <LabelList dataKey="retry" position="inside" fill="white" fontWeight="bold" />
-      </Bar>
+              <Bar 
+                yAxisId="left" 
+                dataKey="ok" 
+                stackId="a" 
+                fill="var(--primary)">
+                <LabelList dataKey="ok" position="inside" fill="white" fontWeight="bold" />
+              </Bar>
+              <Bar yAxisId="left" dataKey="retry" stackId="a" fill="red">
+                <LabelList dataKey="retry" position="inside" fill="white" fontWeight="bold" />
+              </Bar>
 
-      {/* Lines */}
-      <Line
-        yAxisId="right"
-        type="linear"
-        dataKey="rateRetry"
-        stroke="red"
-        strokeWidth={2}
-        dot={{ r: 4 }}
-      >
-        <LabelList
-          dataKey="rateRetry"
-          position="top"
-          formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
-          fill="red"
-        />
-      </Line>
+              <Line
+                yAxisId="right"
+                type="linear"
+                dataKey="rateRetry"
+                stroke="red"
+                strokeWidth={2}
+                dot={{ r: 4 }}
+              >
+                <LabelList
+                  dataKey="rateRetry"
+                  position="top"
+                  formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
+                  fill="red"
+                />
+              </Line>
 
-      <Line
-        yAxisId="right"
-        type="linear"
-        dataKey="rateRetryYear"
-        stroke="green"
-        strokeWidth={2}
-        dot={{ r: 4 }}
-      >
-        <LabelList
-          dataKey="rateRetryYear"
-          position="top"
-          formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
-          fill="green"
-        />
-      </Line>
+              <Line
+                yAxisId="right"
+                type="linear"
+                dataKey="rateRetryYear"
+                stroke="green"
+                strokeWidth={2}
+                dot={{ r: 4 }}
+              >
+                <LabelList
+                  dataKey="rateRetryYear"
+                  position="top"
+                  formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
+                  fill="green"
+                />
+              </Line>
 
-      <ChartTooltip
-        content={<ChartTooltipContent labelFormatter={(value) => value} />}
-      />
-    </ComposedChart>
-  )}
-</ChartContainer>
-
+              <ChartTooltip
+                content={<ChartTooltipContent labelFormatter={(value) => value} />}
+              />
+            </ComposedChart>
+          )}
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 };
 

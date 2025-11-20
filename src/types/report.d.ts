@@ -6,3 +6,13 @@ export interface ProductResponse {
     product: (string | null)[];
   };
 }
+
+export interface AnalyticResponse {
+  status: string;
+  code: number;
+  message: string;
+  data: {
+    date: (string | null)[];
+    analytic: (string | null)[];
+  }
+}
