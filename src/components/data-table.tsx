@@ -92,7 +92,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { getReportData, type ReportDataResponse } from "@/services/getReportData"
+import { getReportData, type ReportDataResponse } from "@/services/api/aa-reports"
+import { getAIQTReportData } from "@/services/api/aiqt-reports"
+import { getBIQTReportData } from "@/services/api/biqt-reports"
+
+import { useAppSource } from "@/contexts/AppSourceContext"
 
 const testData = {
   "TEST CE0": "0042",
@@ -184,6 +188,12 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "LOG_ID",
     header: "Log ID",
+    // cell: ({ row }) => (
+    //   <div className="font-medium">
+    //     {row.original.LOG_ID}
+    //   </div>
+    // ),
+
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
@@ -341,6 +351,8 @@ export function DataTable({ startDate, endDate, selectedProduct }: DataTableProp
     useSensor(KeyboardSensor, {})
   )
 
+  const { appSource } = useAppSource();
+
   const fetchData = async () => {
     try {
       setIsLoading(true)
@@ -388,8 +400,16 @@ export function DataTable({ startDate, endDate, selectedProduct }: DataTableProp
           end = endDate
         }
       }
-      
-      const response = await getReportData(start, end, product)
+
+      const apiMapping: Record<string, Function> = {
+        RG_AA_IOT: getReportData,
+        RG_AIQT_IOT: getAIQTReportData,
+        RG_BIQT_IOT: getBIQTReportData,
+      }
+
+      const apiFn = apiMapping[appSource] ?? getReportData;
+
+      const response = await apiFn(start, end, product);
       
       if (response.success) {
         setData(response.data)
@@ -418,7 +438,6 @@ export function DataTable({ startDate, endDate, selectedProduct }: DataTableProp
       }
     }
 
-    // untuk event manual antar-komponen (tab aktif)
     const handleCustomEvent = () => {
       fetchData()
     }
@@ -432,7 +451,7 @@ export function DataTable({ startDate, endDate, selectedProduct }: DataTableProp
       window.removeEventListener("chart-range-updated", handleCustomEvent)
       window.removeEventListener("product-updated", handleCustomEvent)
     }
-  }, [startDate, endDate, selectedProduct])
+  }, [startDate, endDate, selectedProduct, appSource])
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ LOG_ID }) => LOG_ID) || [],
@@ -809,7 +828,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           </form>
         </div>
         <DrawerFooter>
-          <Button>Save Changes</Button>
           <DrawerClose asChild>
             <Button variant="outline">Close</Button>
           </DrawerClose>

@@ -10,7 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { fetchSummary } from "@/services/api/report"
+import { getSummary } from "@/services/api/aa-reports"
+import { getAIQTSummary } from "@/services/api/aiqt-reports"
+import { getBIQTSummary } from "@/services/api/biqt-reports"
+
+
+import { useAppSource } from "@/contexts/AppSourceContext"
 
 interface SummaryData {
   total_tests: number
@@ -22,6 +27,8 @@ interface SummaryData {
 export function SectionCards() {
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const { appSource } = useAppSource();
 
   const loadData = async () => {
     try {
@@ -69,8 +76,17 @@ export function SectionCards() {
         }
       }
 
-      const result = await fetchSummary(start, end, product)
-      setSummary(result)
+      const apiMapping: Record<string, Function> = {
+        RG_AA_IOT: getSummary,
+        RG_AIQT_IOT: getAIQTSummary,
+        RG_BIQT_IOT: getBIQTSummary,
+      }
+
+      const apiFn = apiMapping[appSource] ?? getSummary;
+
+      const response = await apiFn(start, end, product);
+
+      setSummary(response)
     } catch (error) {
       console.error("Failed to load summary:", error)
     } finally {
@@ -105,7 +121,7 @@ export function SectionCards() {
       window.removeEventListener("chart-range-updated", handleCustomEvent)
       window.removeEventListener("product-updated", handleCustomEvent)
     }
-  }, [])
+  }, [appSource])
 
   const total_tests = summary?.total_tests ?? 0
   const total_ok = summary?.total_ok ?? 0

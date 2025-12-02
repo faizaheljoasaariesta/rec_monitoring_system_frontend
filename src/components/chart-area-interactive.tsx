@@ -38,10 +38,16 @@ import { Spinner } from "@/components/ui/spinner"
 import { Calendar as CalendarIcon, BarChart3, LineChart as LineChartIcon, Layers } from "lucide-react"
 import { type DateRange } from "react-day-picker"
 
-import { getSummaryDaily } from "@/services/aaIotService"
-import { getProduct } from "@/services/api/report"
+import { getSummaryDaily } from "@/services/api/aa-reports"
+import { getAIQTSummaryDaily } from "@/services/api/aiqt-reports"
+import { getBIQTSummaryDaily } from "@/services/api/biqt-reports"
+import { getProduct } from "@/services/api/aa-reports"
+import { getAIQTProduct } from "@/services/api/aiqt-reports"
+import { getBIQTProduct } from "@/services/api/biqt-reports"
 import { Calendar } from "@/components/ui/calendar"
 import { Combobox, type ComboboxItem } from "./combo-box"
+
+import { useAppSource } from "@/contexts/AppSourceContext"
 
 export const description = "An interactive area chart"
 
@@ -58,6 +64,13 @@ interface ChartData {
   rateRetry: number
 }
 
+interface RawDailyData {
+  test_date: string;
+  total_ok: number;
+  total_ng: number;
+  total_retry: number;
+}
+
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("30d")
@@ -71,6 +84,9 @@ export function ChartAreaInteractive() {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
   const [filterChart, setFilterChart] = React.useState("Total All Test")
 
+  const { appSource } = useAppSource();
+
+
   React.useEffect(() => {
     if (isMobile) setTimeRange("7d")
   }, [isMobile])
@@ -81,10 +97,18 @@ export function ChartAreaInteractive() {
       window.startTopLoading()
 
       try {
-        const response = await getProduct()
+        const apiMapping: Record<string, Function> = {
+          RG_AA_IOT: getProduct,
+          RG_AIQT_IOT: getAIQTProduct,
+          RG_BIQT_IOT: getBIQTProduct,
+        }
+
+        const apiFn = apiMapping[appSource] ?? getProduct;
+  
+        const response = await apiFn();
         const products = response.data.product
           .filter(Boolean)
-          .map((p) => ({ value: p as string, label: p as string }))
+          .map((p: string) => ({ value: p as string, label: p as string }))
         setProductList(products)
       } catch (err) {
         console.error("Failed to fetch chart data:", err)
@@ -95,7 +119,7 @@ export function ChartAreaInteractive() {
     }
 
     fetchProduct()
-  }, [])
+  }, [appSource])
 
   // React.useEffect(() => {
   //   const fetchData = async () => {
@@ -185,8 +209,16 @@ export function ChartAreaInteractive() {
         localStorage.setItem("chart-range", JSON.stringify({ start, end }));
   
         window.dispatchEvent(new Event("chart-range-updated"));
+
+        const apiMapping: Record<string, Function> = {
+          RG_AA_IOT: getSummaryDaily,
+          RG_AIQT_IOT: getAIQTSummaryDaily,
+          RG_BIQT_IOT: getBIQTSummaryDaily,
+        }
+
+        const apiFn = apiMapping[appSource] ?? getSummaryDaily;
   
-        const response = await getSummaryDaily(start, end, selectedProduct);
+        const response = await apiFn(start, end, selectedProduct);
         const rawData = response.data;
   
         const generateDateRange = (startDate: string, endDate: string) => {
@@ -202,8 +234,8 @@ export function ChartAreaInteractive() {
   
         const allDates = generateDateRange(start, end);
   
-        const dataMap = new Map(
-          rawData.map((item: any) => [
+        const dataMap = new Map<string, RawDailyData>(
+          rawData.map((item: RawDailyData) => [
             new Date(item.test_date).toISOString().split("T")[0],
             item,
           ])
@@ -229,7 +261,7 @@ export function ChartAreaInteractive() {
     };
   
     fetchData();
-  }, [timeRange, dateRange, selectedProduct]);
+  }, [timeRange, dateRange, selectedProduct, appSource]);
 
   const getFilteredDataKey = () => {
     if (filterChart === "(NG) Test") return "rateNG"
@@ -332,6 +364,9 @@ export function ChartAreaInteractive() {
             >
               <Calendar
                 mode="range"
+                disabled={{
+                  after: new Date(),
+                }}
                 selected={dateRange}
                 onSelect={(range) => {
                   setDateRange(range)

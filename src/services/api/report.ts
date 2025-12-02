@@ -5,6 +5,15 @@ import type {
   AnalyticResponse,
 } from '@/types/report';
 
+export type AnalyticMode = "machine" | "date"
+
+export interface MonthlyAnalyticResponse {
+  machines: any;
+  days: any;
+  status: string
+  data: any
+}
+
 export interface SummaryResponse {
   success: boolean;
   filters: Record<string, any>;
@@ -66,4 +75,22 @@ export const getAnalytic = async (
 
   const response: AxiosResponse<AnalyticResponse> = await axiosInstance.get("/aa-iot/analytic", { params });
   return response.data;
+}
+
+export const getMonthlyAnalytic = async (
+  start?: string,
+  end?: string,
+  mode: AnalyticMode = "machine"
+): Promise<MonthlyAnalyticResponse> => {
+  const params: Record<string, string> = {}
+
+  if (start) params.start = start
+  if (end) params.end = end
+  params.mode = mode
+
+  const response = await axiosInstance.get("/aa-iot/monthly-analytic", {
+    params,
+  })
+
+  return response.data
 }

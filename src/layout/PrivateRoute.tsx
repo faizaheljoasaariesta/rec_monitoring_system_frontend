@@ -21,7 +21,7 @@ const PrivateRoute = ({ children }: Props) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return <>{children}</>
 };
 
 export default PrivateRoute;
