@@ -2,6 +2,7 @@ import axiosInstance from '@/services/axiosInstance'
 import type {
   ProductResponse,
   AnalyticResponse,
+  FocusAnalyticResponse,
 } from '@/types/report';
 
 export type AnalyticMode = "machine" | "date"
@@ -36,24 +37,6 @@ export interface ReportDataResponse {
     start: string
     end: string
     product?: string
-  }
-  data: {
-    LOG_ID: number
-    EMP_NO: string
-    PRODUCT_NO: string
-    LOG_FILENAME: string
-    TEST_ITEM: string
-    TEST_RESULT: string
-    CREATE_DATETIME: string
-    TEST_DATETIME: string
-  }[]
-}
-
-export interface ReportDetailsDataResponse {
-  success: boolean
-  count: number
-  filters: {
-    logid: string
   }
   data: {
     LOG_ID: number
@@ -138,19 +121,6 @@ export const getReportData = async (
   }
 }
 
-export const getReportDataById = async ( logId: string ): Promise<ReportDetailsDataResponse> => {
-  try {
-    const response = await axiosInstance.get<ReportDetailsDataResponse>(
-      `/aa-iot/details`,
-      { params: { logId } }
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error("Error fetching report details data:", error)
-    throw new Error(error.message || "Failed to fetch AA-IoT report detail data")
-  }
-}
-
 export const getSummary = async (
   start: string,
   end: string,
@@ -217,5 +187,24 @@ export const getMonthlyAnalytic = async (
   } catch (error: any) {
     console.error("Errorr fatching monthly analytic:", error);
     throw Error(error.message || "Failed to fetch AA-IOT monthly analytic")
+  }
+}
+
+export const getAAFocusAnalytic = async (
+  machineid: string,
+  daysinterval: string,
+): Promise<FocusAnalyticResponse> => {
+  try {
+    const response = await axiosInstance.get<FocusAnalyticResponse>(
+      "/aa-iot/focus-analytic",
+      {
+        params: { machineid, daysinterval },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fatching analytic data:", error);
+    throw new Error(error.message || "Failed to fetch AA-IOT focus analytic report")
   }
 }

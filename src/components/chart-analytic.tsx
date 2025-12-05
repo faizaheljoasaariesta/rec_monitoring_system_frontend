@@ -58,29 +58,6 @@ interface AAChartProps {
   loading?: boolean;
   chartConfig?: ChartConfig;
 }
-//   const [machine, ok, ng, retry, okYear, ngYear, retryYear] = d;
-
-//   const totalDaily = ok + retry;
-//   const totalYearly = okYear + retryYear;
-
-//   const dailyRate =
-//     totalDaily > 10 ? (retry / totalDaily) * 100 : 0;
-
-//   const yearlyRate =
-//     totalYearly > 10 ? (retryYear / totalYearly) * 100 : 0;
-
-//   return {
-//     machine: `AA-${machine}`,
-//     ok,
-//     ng,
-//     retry,
-//     okYear,
-//     ngYear,
-//     retryYear,
-//     rateRetry: dailyRate,
-//     rateRetryYear: yearlyRate,
-//   };
-// });
 
 const transformApiToMachineData = (items: any[]): MachineData[] => {
   return items.map((item) => {
@@ -173,14 +150,14 @@ const AAChart: React.FC<AAChartProps> = ({
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Analytic Report</CardTitle>
+        <CardTitle>Analytic Daily Report</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
             Result report for {date}
           </span>
         </CardDescription>
         <CardAction>
-        <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+          <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"

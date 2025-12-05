@@ -98,40 +98,42 @@ import { getBIQTReportData } from "@/services/api/biqt-reports"
 
 import { useAppSource } from "@/contexts/AppSourceContext"
 
-const testData = {
-  "TEST CE0": "0042",
-  "TEST CE1": "0043",
-  "TEST UL0": "0054",
-  "TEST UL1": "0052",
-  "TEST UR0": "0053",
-  "TEST UR1": "0053",
-  "TEST BL0": "0045",
-  "TEST BL1": "0045",
-  "TEST BR0": "0049",
-  "TEST BR1": "0049",
-  "TEST L0": "0000",
-  "TEST L1": "0000",
-  "TEST R0": "0000",
-  "TEST R1": "0000",
-  "TEST Xf": "0001",
-  "TEST Yf": "0001",
-  "TEST Xi": "0.002",
-  "TEST Yi": "0.000",
-  "TEST FRr": "0420",
-  "TEST FRl": "0420",
-  "TEST FRb": "0420",
-  "TEST FRt": "0420",
-}
-
 export const schema = z.object({
   LOG_ID: z.number(),
   EMP_NO: z.string(),
+  TRAVEL_CARD_NUMBER: z.string(),
   PRODUCT_NO: z.string(),
   LOG_FILENAME: z.string(),
+  PROGRAM_NAME: z.string(),
+  PROGRAM_VERSION: z.string(),
+  TEST_DESC: z.string(),
   TEST_ITEM: z.string(),
   TEST_RESULT: z.string(),
-  CREATE_DATETIME: z.string(),
   TEST_DATETIME: z.string(),
+  TEST_CE0: z.string(),
+  TEST_CE1: z.string(),
+  TEST_UL0: z.string(),
+  TEST_UL1: z.string(),
+  TEST_UR0: z.string(),
+  TEST_UR1: z.string(),
+  TEST_BL0: z.string(),
+  TEST_BL1: z.string(),
+  TEST_BR0: z.string(),
+  TEST_BR1: z.string(),
+  TEST_L0: z.string(),
+  TEST_L1: z.string(),
+  TEST_R0: z.string(),
+  TEST_R1: z.string(),
+  TEST_Xf: z.string(),
+  TEST_Yf: z.string(),
+  TEST_Xi: z.string(),
+  TEST_Yi: z.string(),
+  TEST_FRr: z.string(),
+  TEST_FRl: z.string(),
+  TEST_FRb: z.string(),
+  TEST_FRt: z.string(),
+  CREATE_USERID: z.number(),
+  CREATE_DATETIME: z.string(),
 })
 
 function DragHandle({ id }: { id: number }) {
@@ -188,11 +190,6 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "LOG_ID",
     header: "Log ID",
-    // cell: ({ row }) => (
-    //   <div className="font-medium">
-    //     {row.original.LOG_ID}
-    //   </div>
-    // ),
 
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
@@ -697,8 +694,29 @@ export function DataTable({ startDate, endDate, selectedProduct }: DataTableProp
   )
 }
 
+function extractTestData(item: z.infer<typeof schema>) {
+  const TEST_EXCLUDE = [
+    "TEST_DESC",
+    "TEST_ITEM",
+    "TEST_RESULT",
+    "TEST_DATETIME",
+  ];
+
+  const entries = Object.entries(item)
+    .filter(([key]) => key.startsWith("TEST_"))
+    .filter(([key]) => !TEST_EXCLUDE.includes(key))
+    .map(([key, value]) => ({
+      name: key,
+      rawKey: key,
+      value: value,
+    }));
+
+  return entries;
+}
+
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
+  const testEntries = extractTestData(item);
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
@@ -717,31 +735,35 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="log-id">Log ID</Label>
-              <Input id="log-id" defaultValue={item.LOG_ID} disabled />
+              <Label htmlFor="log-id">Program Name</Label>
+              <Input id="log-id" defaultValue={item.PROGRAM_NAME} disabled />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="log-id">Program Version</Label>
+              <Input id="log-id" defaultValue={item.PROGRAM_VERSION} disabled />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="emp-no">Employee No.</Label>
-                <Input id="emp-no" defaultValue={item.EMP_NO} />
+                <Label htmlFor="emp-no">Travel Card No.</Label>
+                <Input id="emp-no" defaultValue={item.TRAVEL_CARD_NUMBER} disabled />
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="product-no">Product No.</Label>
-                <Input id="product-no" defaultValue={item.PRODUCT_NO} />
+                <Input id="product-no" defaultValue={item.PRODUCT_NO} disabled/>
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Label htmlFor="log-filename">Log Filename</Label>
-              <Input id="log-filename" defaultValue={item.LOG_FILENAME} className="font-mono" />
+              <Label htmlFor="log-filename">Test Desc</Label>
+              <Input id="log-filename" defaultValue={item.TEST_DESC} className="font-mono" disabled/>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2 flex flex-col gap-3">
                 <Label htmlFor="test-item">Test Item</Label>
-                <Input id="test-item" defaultValue={item.TEST_ITEM} />
+                <Input id="test-item" defaultValue={item.TEST_ITEM} disabled/>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="col-span-1 flex flex-col gap-3">
                 <Label htmlFor="test-result">Test Result</Label>
-                <Input id="test-result" defaultValue={item.TEST_RESULT} />
+                <Input id="test-result" defaultValue={item.TEST_RESULT} disabled/>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -750,15 +772,15 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 <Input 
                   id="test-datetime" 
                   defaultValue={new Date(item.TEST_DATETIME).toLocaleString("en-US", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                                hour12: true,
-                                timeZone: "UTC",
-                              })}
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                    timeZone: "UTC",
+                  })}
                   disabled
                 />
               </div>
@@ -766,7 +788,16 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 <Label htmlFor="create-datetime">Create Date</Label>
                 <Input 
                   id="create-datetime" 
-                  defaultValue={new Date(item.CREATE_DATETIME).toLocaleString()} 
+                  defaultValue={new Date(item.CREATE_DATETIME).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                    timeZone: "UTC",
+                  })}
                   disabled
                 />
               </div>
@@ -794,14 +825,14 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Object.entries(testData).map(([key, value]) => (
-                  <TableRow key={key}>
+                {testEntries.map((t) => (
+                  <TableRow key={t.rawKey}>
                     <TableCell className="font-medium">
                       <Badge
                         variant="outline"
                         className="text-muted-foreground px-1.5"
                       >
-                        {key}
+                        {t.name}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
@@ -809,7 +840,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                         variant="outline"
                         className="text-muted-foreground px-1.5"
                       >
-                        {value}
+                        {t.value}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">

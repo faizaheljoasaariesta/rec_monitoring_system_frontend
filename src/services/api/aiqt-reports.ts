@@ -3,6 +3,7 @@ import axiosInstance from '@/services/axiosInstance'
 import type {
   ProductResponse,
   AnalyticResponse,
+  FocusAnalyticResponse,
 } from '@/types/report';
 
 export type AnalyticMode = "machine" | "date"
@@ -37,24 +38,6 @@ export interface ReportDataResponse {
     start: string
     end: string
     product?: string
-  }
-  data: {
-    LOG_ID: number
-    EMP_NO: string
-    PRODUCT_NO: string
-    LOG_FILENAME: string
-    TEST_ITEM: string
-    TEST_RESULT: string
-    CREATE_DATETIME: string
-    TEST_DATETIME: string
-  }[]
-}
-
-export interface ReportDetailsDataResponse {
-  success: boolean
-  count: number
-  filters: {
-    logid: string
   }
   data: {
     LOG_ID: number
@@ -139,19 +122,6 @@ export const getAIQTReportData = async (
   }
 }
 
-export const getAIQTReportDataById = async ( logId: string ): Promise<ReportDetailsDataResponse> => {
-  try {
-    const response = await axiosInstance.get<ReportDetailsDataResponse>(
-      `/aiqt-iot/details`,
-      { params: { logId } }
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error("Error fetching report details data:", error)
-    throw new Error(error.message || "Failed to fetch AIQT-IoT report detail data")
-  }
-}
-
 export const getAIQTSummary = async (
   start: string,
   end: string,
@@ -218,5 +188,24 @@ export const getAIQTMonthlyAnalytic = async (
   } catch (error: any) {
     console.error("Errorr fatching monthly analytic:", error);
     throw Error(error.message || "Failed to fetch AIQT-IOT monthly analytic")
+  }
+}
+
+export const getAIQTFocusAnalytic = async (
+  machineid: string,
+  daysinterval: string,
+): Promise<FocusAnalyticResponse> => {
+  try {
+    const response = await axiosInstance.get<FocusAnalyticResponse>(
+      "/aiqt-iot/focus-analytic",
+      {
+        params: { machineid, daysinterval },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fatching analytic data:", error);
+    throw new Error(error.message || "Failed to fetch AIQT-IOT focus analytic report")
   }
 }

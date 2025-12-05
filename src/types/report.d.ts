@@ -16,3 +16,20 @@ export interface AnalyticResponse {
     analytic: (string | null)[];
   }
 }
+
+export interface FocusAnalyticResponse {
+  status: string;
+  code: number;
+  filters: {
+    machineid: string | null;
+    daysinterval: string | null;
+  };
+  message: string;
+  data: Array<{
+    date_value: string;
+    NG_Count: number;
+    OK_Count: number;
+  }>
+}
+
+

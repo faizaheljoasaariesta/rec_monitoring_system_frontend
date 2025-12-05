@@ -7,6 +7,10 @@ import PublicRoute from '@/layout/PublicRoute';
 import Dashboard from '@/pages/Dashboard';
 import Product from '@/pages/Product';
 import Analytic from '@/pages/Analytic';
+import MachineReport from '@/pages/MachineReport';
+import ATReport from '@/pages/ATReport';
+import DCReport from '@/pages/DCReport';
+import AIRReport from '@/pages/AIRreport';
 
 const routes: RouteObject[] = [
   {
@@ -22,6 +26,38 @@ const routes: RouteObject[] = [
     element: (
       <PublicRoute>
         <Analytic />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/machinereport',
+    element: (
+      <PublicRoute>
+        <MachineReport />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/atreport',
+    element: (
+      <PublicRoute>
+        <ATReport />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/dcreport',
+    element: (
+      <PublicRoute>
+        <DCReport />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/airreport',
+    element: (
+      <PublicRoute>
+        <AIRReport />
       </PublicRoute>
     ),
   },

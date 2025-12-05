@@ -1,18 +1,15 @@
 import * as React from "react"
 import {
-  IconCamera,
   IconChartBar,
   IconDashboard,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
   IconFileWord,
   IconDeviceComputerCamera,
   IconHelp,
   IconReport,
   IconSearch,
   IconSettings,
-  // IconUsers,
+  IconBrandDatabricks,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -43,66 +40,48 @@ const data = {
     },
     {
       title: "Analytic",
-      url: "/analytic",
+      url: "#",
       icon: IconChartBar,
+      isActive: true,
+      items: [
+        {
+          title: "Daily Report",
+          url: "/analytic",
+        },
+        {
+          title: "Machine Report",
+          url: "/machinereport",
+        },
+      ],
+    },
+    {
+      title: "More Report",
+      url: "#",
+      icon: IconBrandDatabricks,
+      isActive: true,
+      items: [
+        {
+          title: "Air Pressure",
+          url: "/airreport",
+        },
+        {
+          title: "Auto Trimming",
+          url: "/atreport",
+        },
+        {
+          title: "Digital Camera",
+          url: "/dcreport",
+        },
+        // {
+        //   title: "Screw Locking (LOCK)",
+        //   url: "#",
+        // },
+      ],
     },
     {
       title: "Product",
       url: "/product",
       icon: IconDeviceComputerCamera,
-    },
-    // {
-    //   title: "Operator",
-    //   url: "#",
-    //   icon: IconUsers,
-    // },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
   ],
   navSecondary: [
