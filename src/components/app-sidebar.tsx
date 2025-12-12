@@ -72,10 +72,10 @@ const data = {
           title: "Digital Camera",
           url: "/dcreport",
         },
-        // {
-        //   title: "Screw Locking (LOCK)",
-        //   url: "#",
-        // },
+        {
+          title: "Screw Locking (LOCK)",
+          url: "/asreport",
+        },
       ],
     },
     {

@@ -3,12 +3,12 @@ import Joi from 'joi';
 const loginSchema = Joi.object({
   username: Joi.string()
     .email({ tlds: false })
-    .regex(/^[^@]+@(mail\.ugm\.ac\.id|ugm\.ac\.id)$/)
+    .regex(/^[^@]+@(mail\.ugm\.ac\.id|rectech-global\.com)$/)
     .required()
     .messages({
       'string.base': 'Email harus berupa karakter.',
       'string.email': 'Email harus dalam format yang valid.',
-      'string.pattern.base': 'Email hanya diperbolehkan dengan domain @mail.ugm.ac.id atau @ugm.ac.id.',
+      'string.pattern.base': 'Email hanya diperbolehkan dengan domain @rectech-global.com.',
       'any.required': 'Email wajib diisi.',
     }),
   password: Joi.string()

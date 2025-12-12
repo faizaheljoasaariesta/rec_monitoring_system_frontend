@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import ChartDCReport from "@/components/chart-dc-report"
+import { DCDataTable } from "@/components/dc-data-table"
 import { SiteHeaderStatic } from "@/components/site-header-static"
 import {
   SidebarInset,
@@ -25,6 +26,7 @@ export default function DCReport() {
               <div className="px-4 lg:px-6">
                 <ChartDCReport />
               </div>
+              <DCDataTable />
             </div>
           </div>
         </div>

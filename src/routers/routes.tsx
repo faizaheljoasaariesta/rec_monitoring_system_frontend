@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
-// import PrivateRoute from '@/layout/PrivateRoute';
+import PrivateRoute from '@/layout/PrivateRoute';
 import PublicRoute from '@/layout/PublicRoute';
 
 import Dashboard from '@/pages/Dashboard';
@@ -11,67 +11,85 @@ import MachineReport from '@/pages/MachineReport';
 import ATReport from '@/pages/ATReport';
 import DCReport from '@/pages/DCReport';
 import AIRReport from '@/pages/AIRreport';
+import ASReport from '@/pages/ASReport';
+import LoginPage from '@/pages/Login';
 
 const routes: RouteObject[] = [
   {
     path: '/dashboard',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <Dashboard />
-      </PublicRoute>
+      </PrivateRoute>
     ),
   },
   {
     path: '/analytic',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <Analytic />
-      </PublicRoute>
+      </PrivateRoute>
     ),
   },
   {
     path: '/machinereport',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <MachineReport />
-      </PublicRoute>
+      </PrivateRoute>
     ),
   },
   {
     path: '/atreport',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <ATReport />
-      </PublicRoute>
+      </PrivateRoute>
     ),
   },
   {
     path: '/dcreport',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <DCReport />
-      </PublicRoute>
+      </PrivateRoute>
     ),
   },
   {
     path: '/airreport',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <AIRReport />
-      </PublicRoute>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/asreport',
+    element: (
+      <PrivateRoute>
+        <ASReport />
+      </PrivateRoute>
     ),
   },
   {
     path: '/product',
     element: (
-      <PublicRoute>
+      <PrivateRoute>
         <Product />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/login',
+    element: (
+      <PublicRoute>
+        <LoginPage />
       </PublicRoute>
     ),
   },
   {
     path: '*',
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/login" replace />,
   },
 ];
 

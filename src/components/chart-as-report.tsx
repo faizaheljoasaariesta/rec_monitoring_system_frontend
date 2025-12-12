@@ -28,9 +28,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
-import { getATFocusAnalytic } from "@/services/api/at-reports";
-import { SingleComboBox } from "@/components/single-combo-box";
-
+import { getASFocusAnalytic } from "@/services/api/as-reports";
 
 export interface MachineData {
   date: string;
@@ -51,7 +49,7 @@ interface AAChartProps {
 
 const transformApiToMachineData = (items: any[]): MachineData[] => {
   const fy = items.find(
-    (item) => String(item.date_value).toLowerCase() === "full year"
+    (item) => String(item.date_value).toLowerCase() === "sum"
   );
 
   const NGCountYear = fy ? Number(fy.NG_Count) : 0;
@@ -64,8 +62,13 @@ const transformApiToMachineData = (items: any[]): MachineData[] => {
 
   return items
     .filter(
-      (item) => String(item.date_value).toLowerCase() !== "full year"
+      (item) => String(item.date_value).toLowerCase() !== "sum"
     )
+    .sort((a, b) => {
+      const da = new Date(a.date_value).getTime();
+      const db = new Date(b.date_value).getTime();
+      return da - db;
+    })
     .map((item) => {
       const date = String(item.date_value);
       const NGCount = Number(item.NG_Count);
@@ -88,17 +91,11 @@ const transformApiToMachineData = (items: any[]): MachineData[] => {
     }); 
 };
 
-const machineItems = [
-  { value: "5", label: "Machine 5" },
-  { value: "9", label: "Machine 9" },
-];
-
-const ChartATReport: React.FC<AAChartProps> = ({
+const ChartASReport: React.FC<AAChartProps> = ({
   chartConfig = {},
 }) => {
   const [chartData, setChartData] = React.useState<MachineData[]>();
   const [loadingData, setLoadingData] = React.useState(false);
-  const [machineId, setMachineID] = React.useState("5");
   const [interval, setInterval] = React.useState("15");
 
   const today = new Date();
@@ -112,7 +109,7 @@ const ChartATReport: React.FC<AAChartProps> = ({
       window.startTopLoading();
 
       try {
-        const res = await getATFocusAnalytic(machineId, interval);
+        const res = await getASFocusAnalytic(interval);
         const parsed = transformApiToMachineData(res.data);
         setChartData(parsed);
       } catch (err) {
@@ -124,12 +121,12 @@ const ChartATReport: React.FC<AAChartProps> = ({
     };
 
     fetchInitial();
-  }, [interval, machineId]);
+  }, [interval]);
 
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Analytic Auto Trimming Report</CardTitle>
+        <CardTitle>Analytic Screw Locking Report</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
             Result report for {interval} Day Ago.
@@ -147,12 +144,6 @@ const ChartATReport: React.FC<AAChartProps> = ({
             <ToggleGroupItem value="15">Last 15 days</ToggleGroupItem>
             <ToggleGroupItem value="7">Last 7 days</ToggleGroupItem>
           </ToggleGroup>
-          <SingleComboBox
-            items={machineItems}
-            value={machineId}
-            onChange={setMachineID}
-            placeholder="Select Machine..."
-          />
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
@@ -241,4 +232,4 @@ const ChartATReport: React.FC<AAChartProps> = ({
 
 }
 
-export default ChartATReport;
+export default ChartASReport;

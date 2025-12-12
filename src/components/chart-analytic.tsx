@@ -39,7 +39,15 @@ import { getAnalytic } from "@/services/api/aa-reports";
 import { getAIQTAnalytic } from "@/services/api/aiqt-reports";
 import { getBIQTAnalytic } from "@/services/api/biqt-reports";
 
+import { exportChartPDF } from "@/services/pdf/dailyReport";
+
 import { useAppSource } from "@/contexts/AppSourceContext"
+
+const titleMapping: Record<string, String> = {
+  RG_AA_IOT: "AA IOT",
+  RG_AIQT_IOT: "AIQT IOT",
+  RG_BIQT_IOT: "BIQT IOT",
+}
 
 export interface MachineData {
   machine: string;
@@ -96,6 +104,8 @@ const AAChart: React.FC<AAChartProps> = ({
   const [date, setDate] = React.useState('Yesterday');
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
 
+  const chartRef = React.useRef<HTMLDivElement>(null);
+
   const { appSource } = useAppSource();
 
   const today = new Date();
@@ -136,6 +146,11 @@ const AAChart: React.FC<AAChartProps> = ({
         const parsed = transformApiToMachineData(res.data.analytic);
 
         setChartData(parsed);
+        
+        setDateRange({
+          from: twoDaysAgo,
+          to: yesterday
+        });
 
       } catch (err) {
         console.error("Error fetching analytic data:", err);
@@ -156,7 +171,7 @@ const AAChart: React.FC<AAChartProps> = ({
             Result report for {date}
           </span>
         </CardDescription>
-        <CardAction>
+        <CardAction className="flex gap-2">
           <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
             <PopoverTrigger asChild>
               <Button
@@ -232,10 +247,29 @@ const AAChart: React.FC<AAChartProps> = ({
               />
             </PopoverContent>
           </Popover>
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden items-center gap-2 h-9 rounded-md @[767px]/card:flex"
+            onClick={() => {
+              if (!chartRef.current) {
+                console.error("Chart container not found");
+                return;
+              }
+
+              exportChartPDF(chartData || [], chartRef.current, {
+                title: `Analytic Daily Report: ${titleMapping[appSource]}`,
+                dateRange,
+                dataType: `${titleMapping[appSource]}`,
+              });
+            }}
+          >
+            Export PDF
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={chartConfig} className="w-full h-[400px]">
+        <ChartContainer ref={chartRef} config={chartConfig} className="w-full h-[400px]">
           {loadingData ? (
             <div className="flex w-full h-full justify-center items-center gap-2">
               <p>Loading...</p>

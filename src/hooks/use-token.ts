@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useIsAuth } from './use-auth';
-import { login as loginApi } from '../services/api';
-import type { LoginPayload } from '../types/auth';
+import { login as loginApi } from '@/services/api/auth';
+import type { LoginPayload } from '@/types/auth';
 
 export const useIsToken = () => {
   const { login } = useIsAuth();

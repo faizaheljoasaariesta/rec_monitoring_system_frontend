@@ -2,6 +2,7 @@ import axiosInstance from '@/services/axiosInstance'
 
 import type {
   FocusAnalyticResponse,
+  ReportDCDataResponse,
 } from '@/types/report';
 
 
@@ -20,5 +21,17 @@ export const getDCFocusAnalytic = async (
   } catch (error: any) {
     console.error("Error fatching analytic data:", error);
     throw new Error(error.message || "Failed to fetch DC-IOT focus analytic report")
+  }
+}
+
+export const getDCReportData = async (): Promise<ReportDCDataResponse> => {
+  try {
+    const response = await axiosInstance.get<ReportDCDataResponse>(
+      `/dc-iot/data`
+    )
+    return response.data
+  } catch (error: any) {
+    console.error("Error fetching report data:", error)
+    throw new Error(error.message || "Failed to fetch DC-IoT report data")
   }
 }

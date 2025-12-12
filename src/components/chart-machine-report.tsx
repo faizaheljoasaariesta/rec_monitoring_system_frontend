@@ -25,25 +25,16 @@ import {
   LabelList,
 } from "recharts";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
-import { Button } from "@/components/ui/button"
-import { Calendar as CalendarIcon } from "lucide-react"
-
-import { Calendar } from "@/components/ui/calendar"
-
-import { type DateRange } from "react-day-picker"
 import { getAAFocusAnalytic } from "@/services/api/aa-reports";
 import { getAIQTFocusAnalytic } from "@/services/api/aiqt-reports";
 import { getBIQTFocusAnalytic } from "@/services/api/biqt-reports";
 
 import { useAppSource } from "@/contexts/AppSourceContext"
+import { MachineDataTable } from "@/components/machine-data-table";
+import { MachineCombobox } from "@/components/machine-combo-box";
 
 export interface MachineData {
   date: string;
@@ -101,12 +92,18 @@ const transformApiToMachineData = (items: any[]): MachineData[] => {
     }); 
 };
 
+const machineMapping: Record<string, string[]> = {
+  RG_AA_IOT: ["2", "3", "4", "5", "7", "8", "9", "10", "11"],
+  RG_AIQT_IOT: ["1", "2", "3"],
+  RG_BIQT_IOT: ["1", "2", "3"],
+};
+
 const ChartMachineReport: React.FC<AAChartProps> = ({
   chartConfig = {},
 }) => {
   const [chartData, setChartData] = React.useState<MachineData[]>();
   const [loadingData, setLoadingData] = React.useState(false);
-  const [machineId, setMachineID] = React.useState("3");
+  const [machineId, setMachineID] = React.useState("2");
   const [interval, setInterval] = React.useState("15");
 
   const { appSource } = useAppSource();
@@ -134,8 +131,6 @@ const ChartMachineReport: React.FC<AAChartProps> = ({
 
         const parsed = transformApiToMachineData(res.data);
 
-        console.log(parsed)
-
         setChartData(parsed);
       } catch (err) {
         console.error("Error fetching analytic data:", err);
@@ -148,111 +143,126 @@ const ChartMachineReport: React.FC<AAChartProps> = ({
     fetchInitial();
   }, [interval, machineId, appSource]);
 
+  React.useEffect(() => {
+    const defaultMachine = machineMapping[appSource]?.[0] ?? "1";
+    setMachineID(defaultMachine);
+  }, [appSource]);
+  
+
   return (
-    <Card className="@container/card">
-      <CardHeader>
-        <CardTitle>Analytic Machine Report</CardTitle>
-        <CardDescription>
-          <span className="hidden @[540px]/card:block">
-            Result report for {interval} Day Ago.
-          </span>
-        </CardDescription>
-        <CardAction className="flex items-center gap-2">
-          <ToggleGroup
-            type="single"
-            value={interval}
-            onValueChange={setInterval}
-            variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
-          >
-            <ToggleGroupItem value="30">Last 1 months</ToggleGroupItem>
-            <ToggleGroupItem value="15">Last 15 days</ToggleGroupItem>
-            <ToggleGroupItem value="7">Last 7 days</ToggleGroupItem>
-          </ToggleGroup>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={chartConfig} className="w-full h-[400px]">
-          {loadingData ? (
-            <div className="flex w-full h-full justify-center items-center gap-2">
-              <p>Loading...</p>
-            </div>
-          ) : (
-            <ComposedChart
-              data={chartData}
-              margin={{ top: 20, right: 0, bottom: 0, left: 0 }}
+    <>
+      <Card className="@container/card">
+        <CardHeader>
+          <CardTitle>Analytic Machine Report</CardTitle>
+          <CardDescription>
+            <span className="hidden @[540px]/card:block">
+              Result report for {interval} Day Ago.
+            </span>
+          </CardDescription>
+          <CardAction className="flex items-center gap-2">
+            <ToggleGroup
+              type="single"
+              value={interval}
+              onValueChange={setInterval}
+              variant="outline"
+              className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-
-              <XAxis
-                dataKey="date"
-                tickLine={true}
-                axisLine={true}
-                tickMargin={8}
-              />
-
-              <YAxis
-                yAxisId="left"
-                label={{ value: "Counts", angle: -90, position: "insideLeft" }}
-              />
-
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                label={{ value: "Rate (%)", angle: 90, position: "insideRight" }}
-              />
-
-              <Bar 
-                yAxisId="left" 
-                dataKey="OKCount" 
-                stackId="a" 
-                fill="var(--primary)">
-                <LabelList dataKey="OKCount" position="inside" fill="white" fontWeight="bold" />
-              </Bar>
-              <Bar yAxisId="left" dataKey="NGCount" stackId="a" fill="red">
-                <LabelList dataKey="NGCount" position="inside" fill="white" fontWeight="bold" />
-              </Bar>
-
-              <Line
-                yAxisId="right"
-                type="linear"
-                dataKey="NGRate"
-                stroke="red"
-                strokeWidth={2}
-                dot={{ r: 4 }}
+              <ToggleGroupItem value="30">Last 1 months</ToggleGroupItem>
+              <ToggleGroupItem value="15">Last 15 days</ToggleGroupItem>
+              <ToggleGroupItem value="7">Last 7 days</ToggleGroupItem>
+            </ToggleGroup>
+            
+            <MachineCombobox
+              appSource={appSource}
+              value={machineId}
+              onChange={(v) => setMachineID(v)}
+            />
+          </CardAction>
+        </CardHeader>
+        <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+          <ChartContainer config={chartConfig} className="w-full h-[400px]">
+            {loadingData ? (
+              <div className="flex w-full h-full justify-center items-center gap-2">
+                <p>Loading...</p>
+              </div>
+            ) : (
+              <ComposedChart
+                data={chartData}
+                margin={{ top: 20, right: 0, bottom: 0, left: 0 }}
               >
-                <LabelList
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+
+                <XAxis
+                  dataKey="date"
+                  tickLine={true}
+                  axisLine={true}
+                  tickMargin={8}
+                />
+
+                <YAxis
+                  yAxisId="left"
+                  label={{ value: "Counts", angle: -90, position: "insideLeft" }}
+                />
+
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  label={{ value: "Rate (%)", angle: 90, position: "insideRight" }}
+                />
+
+                <Bar 
+                  yAxisId="left" 
+                  dataKey="OKCount" 
+                  stackId="a" 
+                  fill="var(--primary)">
+                  <LabelList dataKey="OKCount" position="inside" fill="white" fontWeight="bold" />
+                </Bar>
+                <Bar yAxisId="left" dataKey="NGCount" stackId="a" fill="red">
+                  <LabelList dataKey="NGCount" position="inside" fill="white" fontWeight="bold" />
+                </Bar>
+
+                <Line
+                  yAxisId="right"
+                  type="linear"
                   dataKey="NGRate"
-                  position="top"
-                  formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
-                  fill="red"
-                />
-              </Line>
+                  stroke="red"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                >
+                  <LabelList
+                    dataKey="NGRate"
+                    position="top"
+                    formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
+                    fill="red"
+                  />
+                </Line>
 
-              <Line
-                yAxisId="right"
-                type="linear"
-                dataKey="NGYearRate"
-                stroke="green"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-              >
-                <LabelList
+                <Line
+                  yAxisId="right"
+                  type="linear"
                   dataKey="NGYearRate"
-                  position="top"
-                  formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
-                  fill="green"
-                />
-              </Line>
+                  stroke="green"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                >
+                  <LabelList
+                    dataKey="NGYearRate"
+                    position="top"
+                    formatter={(v: number) => (v === 0 ? "NA" : `${v.toFixed(1)}%`)}
+                    fill="green"
+                  />
+                </Line>
 
-              <ChartTooltip
-                content={<ChartTooltipContent labelFormatter={(value) => value} />}
-              />
-            </ComposedChart>
-          )}
-        </ChartContainer>
-      </CardContent>
-    </Card>
+                <ChartTooltip
+                  content={<ChartTooltipContent labelFormatter={(value) => value} />}
+                />
+              </ComposedChart>
+            )}
+          </ChartContainer>
+        </CardContent>
+      </Card>
+      {chartData && <MachineDataTable data={chartData} />}
+    </>
   )
 
 }

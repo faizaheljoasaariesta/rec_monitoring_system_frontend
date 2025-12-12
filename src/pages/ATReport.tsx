@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar"
+import { ATDataTable } from "@/components/at-data-table"
 import ChartATReport from "@/components/chart-at-report"
 import { SiteHeaderStatic } from "@/components/site-header-static"
 import {
@@ -25,6 +26,7 @@ export default function ATReport() {
               <div className="px-4 lg:px-6">
                 <ChartATReport />
               </div>
+              <ATDataTable />
             </div>
           </div>
         </div>

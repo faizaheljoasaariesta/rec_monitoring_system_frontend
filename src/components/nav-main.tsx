@@ -50,7 +50,6 @@ export function NavMain({ items }: NavMainProps) {
             const isActive = location.pathname === item.url || item.isActive
 
             if (hasSubItems) {
-              // Menu dengan submenu collapsible
               return (
                 <Collapsible
                   key={item.title}
@@ -97,7 +96,6 @@ export function NavMain({ items }: NavMainProps) {
               )
             }
 
-            // Menu tanpa submenu
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton

@@ -121,56 +121,6 @@ export function ChartAreaInteractive() {
     fetchProduct()
   }, [appSource])
 
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true)
-  //     try {
-  //       let start: string
-  //       let end: string
-
-  //       if (timeRange === "custom" && dateRange?.from && dateRange?.to) {
-  //         start = dateRange.from.toISOString().split("T")[0]
-  //         end = dateRange.to.toISOString().split("T")[0]
-  //       } else {
-  //         const now = new Date()
-  //         let days = 30
-  //         if (timeRange === "7d") days = 7
-  //         if (timeRange === "90d") days = 90
-
-  //         const endDate = now.toISOString().split("T")[0]
-  //         const startDate = new Date(now)
-  //         startDate.setDate(startDate.getDate() - days)
-  //         start = startDate.toISOString().split("T")[0]
-  //         end = endDate
-  //       }
-
-  //       localStorage.setItem("chart-time-range", timeRange)
-  //       if (dateRange)
-  //         localStorage.setItem("chart-date-range", JSON.stringify(dateRange))
-  //       localStorage.setItem("chart-range", JSON.stringify({ start, end }))
-
-  //       window.dispatchEvent(new Event("chart-range-updated"))
-
-  //       const response = await getSummaryDaily(start, end, selectedProduct)
-  //       console.log(start, end, selectedProduct)
-  //       const formatted = response.data.map((item: any) => ({
-  //         date: new Date(item.test_date).toISOString().split("T")[0],
-  //         rateOK: item.total_ok,
-  //         rateNG: item.total_ng,
-  //         rateRetry: item.total_retry,
-  //       }))
-  //       setChartData(formatted)
-  //       console.log(chartData)
-  //     } catch (err) {
-  //       console.error("Failed to fetch chart data:", err)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-
-  //   fetchData()
-  // }, [timeRange, dateRange, selectedProduct])
-
   React.useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -372,8 +322,6 @@ export function ChartAreaInteractive() {
                   setDateRange(range)
                   if (range?.from && range?.to) {
                     setTimeRange("custom")
-                    console.log(range)
-                    console.log(dateRange)
                   }
                 }}
                 className="rounded-lg shadow-sm"

@@ -2,16 +2,15 @@ import axiosInstance from '@/services/axiosInstance'
 
 import type {
   FocusAnalyticResponse,
-  ReportAIRDataResponse,
+  ReportLOCKDataResponse,
 } from '@/types/report';
 
-
-export const getAIRFocusAnalytic = async (
+export const getASFocusAnalytic = async (
   daysinterval: string,
 ): Promise<FocusAnalyticResponse> => {
   try {
     const response = await axiosInstance.get<FocusAnalyticResponse>(
-      "/air-iot/focus-analytic",
+      "/lock-iot/focus-analytic",
       {
         params: { daysinterval },
       }
@@ -20,18 +19,18 @@ export const getAIRFocusAnalytic = async (
     return response.data;
   } catch (error: any) {
     console.error("Error fatching analytic data:", error);
-    throw new Error(error.message || "Failed to fetch AIR-IOT focus analytic report")
+    throw new Error(error.message || "Failed to fetch AS-IOT focus analytic report")
   }
 }
 
-export const getAIRReportData = async (): Promise<ReportAIRDataResponse> => {
+export const getLOCKReportData = async (): Promise<ReportLOCKDataResponse> => {
   try {
-    const response = await axiosInstance.get<ReportAIRDataResponse>(
-      `/air-iot/data`
+    const response = await axiosInstance.get<ReportLOCKDataResponse>(
+      `/lock-iot/data`
     )
     return response.data;
   } catch (error: any) {
     console.error("Error fetching report data:", error)
-    throw new Error(error.message || "Failed to fetch AIR-IoT report data")
+    throw new Error(error.message || "Failed to fetch LOCK-IoT report data")
   }
 }
