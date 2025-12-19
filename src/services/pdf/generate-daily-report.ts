@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import domtoimage from "dom-to-image";
-import type { MachineData } from "@/components/chart/chart-analytic-report";
+import type { MachineDataAnalytic } from "@/types/report";
 
 interface ExportOptions {
   title?: string;
@@ -9,7 +9,7 @@ interface ExportOptions {
 }
 
 export const exportChartPDF = async (
-  data: MachineData[],
+  data: MachineDataAnalytic[],
   chartElement: HTMLElement | null,
   options: ExportOptions = {}
 ) => {

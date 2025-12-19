@@ -1,6 +1,6 @@
 import jsPDF from "jspdf"
 import domtoimage from "dom-to-image"
-import type { MachineData } from "@/components/chart/chart-machine-report"
+import type { MachineData } from "@/types/report";
 
 interface ExportOptions {
   title?: string
@@ -49,15 +49,9 @@ export const exportChartMachinePDF = async (
   pdf.text("Analytic Report Summary", 14, yPosition)
   yPosition += 6
 
-  // ============================================================
-  // === ADDED: pagination constants ============================
-  // ============================================================
   const PAGE_TOP = 55
   const PAGE_BOTTOM = 280
 
-  // ============================================================
-  // === ADDED: reusable table header renderer ==================
-  // ============================================================
   const renderTableHeader = (pdf: jsPDF, y: number) => {
     pdf.setFontSize(10)
     pdf.setFont("helvetica", "normal")
@@ -78,25 +72,19 @@ export const exportChartMachinePDF = async (
     return y + 6
   }
 
-  // ============================================================
-  // === MODIFIED: table rendering with auto page break =========
-  // ============================================================
   pdf.setFontSize(10)
   pdf.setFont("helvetica", "normal")
 
   const colX = [14, 45, 65, 85, 115, 140, 165]
 
-  // === ADDED: render first table header =======================
   yPosition = renderTableHeader(pdf, yPosition)
 
   for (const d of data) {
-    // === ADDED: page break check ==============================
     if (yPosition > PAGE_BOTTOM) {
       pdf.addPage()
       await addHeader(pdf)
       yPosition = PAGE_TOP
 
-      // === ADDED: re-render table header on new page ==========
       yPosition = renderTableHeader(pdf, yPosition)
     }
 
@@ -117,9 +105,6 @@ export const exportChartMachinePDF = async (
   pdf.save(`${options.title || "Report"}.pdf`)
 }
 
-// ============================================================
-// === UNCHANGED: image helper ================================
-// ============================================================
 const getBase64Image = (url: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -144,9 +129,6 @@ const getBase64Image = (url: string): Promise<string> => {
   })
 }
 
-// ============================================================
-// === UNCHANGED: PDF header ==================================
-// ============================================================
 const addHeader = async (pdf: jsPDF) => {
   try {
     const logoBase64 = await getBase64Image("/logo-pdf.png")

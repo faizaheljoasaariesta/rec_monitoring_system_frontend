@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx"
-import type { MachineData } from "@/components/chart/chart-analytic-report"
+import type { MachineDataAnalytic } from "@/types/report";
 
 interface ExportExcelOptions {
   title?: string
@@ -8,7 +8,7 @@ interface ExportExcelOptions {
 }
 
 export const exportChartExcel = (
-  data: MachineData[],
+  data: MachineDataAnalytic[],
   options: ExportExcelOptions = {}
 ) => {
   if (!data || data.length === 0) return

@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx"
-import type { MachineData } from "@/components/chart/chart-machine-report"
+import type { MachineData } from "@/types/report";
 
 interface ExportExcelOptions {
   title?: string
