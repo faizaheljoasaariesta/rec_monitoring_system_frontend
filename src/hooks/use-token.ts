@@ -14,7 +14,8 @@ export const useIsToken = () => {
       username: response.username,
       name: response.name,
       email: response.email,
-      role: response.role
+      role: response.role,
+      avatar: '',
     });
     navigate('/dashboard');
   };

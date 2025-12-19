@@ -3,7 +3,14 @@ export interface ProductResponse {
   code: number;
   message: string;
   data: {
-    product: (string | null)[];
+    product: {
+      ProductNo: string;
+      TravelCard: string;
+      SerialNo: number;
+      Operator: string;
+      LastTestDatetime: string;
+      Result: string;
+    }[];
   };
 }
 
@@ -12,8 +19,11 @@ export interface AnalyticResponse {
   code: number;
   message: string;
   data: {
-    date: (string | null)[];
-    analytic: (string | null)[];
+    date: {
+      startDate: string;
+      endDate: string;
+    };
+    analytic: any[];
   }
 }
 
@@ -135,4 +145,39 @@ export interface ReportLOCKDataResponse {
   }[];
 }
 
+export interface MachineData {
+  date: string;
+  NGCount: number;
+  OKCount: number;
+  NGCountYear: number;
+  OKCountYear: number,
+  NGRate: number;
+  NGYearRate: number;
+}
+
+export interface MachineDataAnalytic {
+  machine: string;
+  ok: number;
+  ng: number;
+  retry: number;
+  okYear: number;
+  ngYear: number;
+  retryYear: number;
+  rateRetry: number;
+  rateRetryYear: number;
+}
+
+export interface ChartData {
+  date: string
+  rateOK: number
+  rateNG: number
+  rateRetry: number
+}
+
+export interface RawDailyData {
+  test_date: string;
+  total_ok: number;
+  total_ng: number;
+  total_retry: number;
+}
 

@@ -1,18 +1,19 @@
 import { Navigate } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
-import PrivateRoute from '@/layout/PrivateRoute';
-import PublicRoute from '@/layout/PublicRoute';
+import PrivateRoute from '@/layout/private-route';
+import PublicRoute from '@/layout/public-route';
 
-import Dashboard from '@/pages/Dashboard';
-import Product from '@/pages/Product';
-import Analytic from '@/pages/Analytic';
-import MachineReport from '@/pages/MachineReport';
-import ATReport from '@/pages/ATReport';
-import DCReport from '@/pages/DCReport';
-import AIRReport from '@/pages/AIRreport';
-import ASReport from '@/pages/ASReport';
-import LoginPage from '@/pages/Login';
+import Dashboard from '@/pages/dashboard-page';
+import Product from '@/pages/product-page';
+import Analytic from '@/pages/analytic-report-page';
+import MachineReport from '@/pages/machine-report-page';
+import ATReport from '@/pages/at-report-page';
+import DCReport from '@/pages/dc-report-page';
+import AIRReport from '@/pages/air-report-page';
+import ASReport from '@/pages/as-report-page';
+import LoginPage from '@/pages/login-page';
+import Users from '@/pages/users-setting-page';
 
 const routes: RouteObject[] = [
   {
@@ -85,6 +86,14 @@ const routes: RouteObject[] = [
       <PublicRoute>
         <LoginPage />
       </PublicRoute>
+    ),
+  },
+  {
+    path: '/users',
+    element: (
+      <PrivateRoute>
+        <Users />
+      </PrivateRoute>
     ),
   },
   {

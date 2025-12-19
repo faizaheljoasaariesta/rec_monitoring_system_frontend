@@ -1,4 +1,4 @@
-import { register as registerApi } from '@/services/api';
+import { register as registerApi } from '@/services/api/auth';
 import type { RegisterPayload } from '@/types/auth';
 
 export const useIsRegister = () => {

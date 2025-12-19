@@ -2,8 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
-import { AuthProvider } from './contexts/AuthProvider';
-import { AppSourceProvider } from './contexts/AppSourceContext';
+import { AuthProvider } from './contexts/auth-provider.tsx';
+import { AppSourceProvider } from './contexts/app-source-provider.tsx';
 import { ThemeProvider } from "@/components/theme-provider"
 
 createRoot(document.getElementById('root')!).render(

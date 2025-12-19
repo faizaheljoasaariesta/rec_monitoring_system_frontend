@@ -1,20 +1,13 @@
 import * as React from "react"
+import { useContext } from "react";
 import {
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileWord,
-  IconDeviceComputerCamera,
   IconHelp,
-  IconReport,
-  IconSearch,
   IconSettings,
-  IconBrandDatabricks,
 } from "@tabler/icons-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/navigation/nav-main"
+import { NavSecondary } from "@/components/navigation/nav-secondary"
+import { NavUser } from "@/components/navigation/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -25,102 +18,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Separator } from "./ui/separator"
-
-const data = {
-  user: {
-    name: "Faizahel Joasa Ariesta",
-    email: "faizaheljoasaariesta@mail.ugm.ac.id",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: IconDashboard,
-    },
-    {
-      title: "Analytic",
-      url: "#",
-      icon: IconChartBar,
-      isActive: true,
-      items: [
-        {
-          title: "Daily Report",
-          url: "/analytic",
-        },
-        {
-          title: "Machine Report",
-          url: "/machinereport",
-        },
-      ],
-    },
-    {
-      title: "More Report",
-      url: "#",
-      icon: IconBrandDatabricks,
-      isActive: true,
-      items: [
-        {
-          title: "Air Pressure",
-          url: "/airreport",
-        },
-        {
-          title: "Auto Trimming",
-          url: "/atreport",
-        },
-        {
-          title: "Digital Camera",
-          url: "/dcreport",
-        },
-        {
-          title: "Screw Locking (LOCK)",
-          url: "/asreport",
-        },
-      ],
-    },
-    {
-      title: "Product",
-      url: "/product",
-      icon: IconDeviceComputerCamera,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-}
+import { AuthContext } from "@/contexts/auth-context";
+import { navigation } from "@/constants/navigation";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { auth } = useContext(AuthContext);
+
+  const navSecondaryItems = [
+    { title: "Settings", url: "/users", icon: IconSettings, roles: ["administrator"] },
+    { title: "Get Help", url: "https://faizaheljoasaariesta.com", icon: IconHelp, roles: ["administrator", "operator"] },
+  ].filter(item => auth.user && item.roles.includes(auth.user.role));
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -139,11 +47,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <Separator />
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navigation.navMain} />
+        <NavSecondary items={navSecondaryItems} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {auth.user ? (
+          <NavUser user={auth.user} />
+        ) : (
+          <div className="p-4 text-muted-foreground">Not logged in</div>
+        )}
       </SidebarFooter>
     </Sidebar>
   )

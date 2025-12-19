@@ -1,21 +1,14 @@
 import type { AxiosResponse } from 'axios';
-import axiosInstance from '@/services/axiosInstance';
+import axiosInstance from '@/utils/axios-instance';
 import type {
   RegisterPayload,
   RegisterResponse,
-  VerifyPayload,
-  VerifyResponse,
   LoginPayload,
   LoginResponse,
 } from '@/types/auth';
 
 export const register = async (payload: RegisterPayload): Promise<RegisterResponse> => {
   const response: AxiosResponse<{ data: RegisterResponse }> = await axiosInstance.post('/register', payload);
-  return response.data.data;
-};
-
-export const verify = async (payload: VerifyPayload): Promise<VerifyResponse> => {
-  const response: AxiosResponse<{ data: VerifyResponse }> = await axiosInstance.post('/verify', payload);
   return response.data.data;
 };
 

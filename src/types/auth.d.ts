@@ -14,25 +14,6 @@ export interface RegisterResponse {
   };
 }
 
-export interface VerifyPayload {
-  email: string;
-  code: string;
-}
-
-export interface VerifyResponse {
-  status: string;
-  code: number;
-  message: string;
-  data: {
-    id: string;
-    name: string;
-    email: string;
-    username: string;
-    role: string;
-    createdAt: string;
-  };
-}
-
 export interface LoginPayload {
   username: string;
   password: string;

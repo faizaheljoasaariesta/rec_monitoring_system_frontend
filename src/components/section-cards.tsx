@@ -10,12 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getSummary } from "@/services/api/aa-reports"
-import { getAIQTSummary } from "@/services/api/aiqt-reports"
-import { getBIQTSummary } from "@/services/api/biqt-reports"
+import { getSummary } from "@/services/api/reports/aa-reports"
+import { getAIQTSummary } from "@/services/api/reports/aiqt-reports"
+import { getBIQTSummary } from "@/services/api/reports/biqt-reports"
 
 
-import { useAppSource } from "@/contexts/AppSourceContext"
+import { useAppSource } from "@/contexts/app-source-provider"
 
 interface SummaryData {
   total_tests: number
