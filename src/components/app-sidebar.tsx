@@ -38,7 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-10!"
             >
-              <a href="/dashboard">
+              <a href="/">
                 <img src="/logo.png" className="size-40!"/>
               </a>
             </SidebarMenuButton>
