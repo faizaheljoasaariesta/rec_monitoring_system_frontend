@@ -164,9 +164,9 @@ const getUserColumns = (fetchUsers: () => void): ColumnDef<User>[] => [
               onClick={async() => {
                 try {
                   await navigator.clipboard.writeText(user.id);
-                  toast.success("User ID berhasil disalin ke clipboard");
+                  toast.success("User ID successfully copied to the clipboard");
                 } catch (err) {
-                  toast.error("Gagal menyalin User ID");
+                  toast.error("Failed to copy User ID");
                   console.error(err);
                 }
               }}

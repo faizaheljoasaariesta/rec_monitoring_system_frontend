@@ -44,8 +44,8 @@ export function AddUserForm({ onSuccess }: AddUserDialogProps) {
 
     try {
       await register(form)
-      toast.success("User berhasil ditambahkan", {
-        description: `Akun ${form.email} berhasil dibuat.`,
+      toast.success("User successfully added", {
+        description: `Account ${form.email} was successfully created.`,
       })
       setOpen(false)
       onSuccess?.()
@@ -56,10 +56,10 @@ export function AddUserForm({ onSuccess }: AddUserDialogProps) {
         confirmPassword: "",
       })
     } catch (error: any) {
-      toast.error("Gagal menambahkan user", {
+      toast.error("Failed to add user", {
         description:
           error?.response?.data?.message ??
-          "Terjadi kesalahan saat membuat user.",
+          "An error occurred while creating the user.",
       })
       console.error("Register failed:", error)
     } finally {

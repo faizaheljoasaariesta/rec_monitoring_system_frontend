@@ -21,10 +21,10 @@ export function DeleteUserDialog({ user, onSuccess }: {
   const handleDelete = async () => {
     try {
       await deleteUser(user.id);
-      toast.success(`User ${user.name} berhasil dihapus`);
+      toast.success(`User ${user.name} was successfully deleted`);
       onSuccess?.();
     } catch (err) {
-      toast.error("Gagal menghapus user");
+      toast.error("Failed to delete user");
     }
   }
 
