@@ -188,10 +188,10 @@ const ChartAnalyticReport: React.FC<AAChartProps> = ({
             >
               <Calendar
                 mode="single"
-                disabled={{
-                  after: yesterday,
-                  before: oneMonthBeforeToday,
-                }}
+                // disabled={{
+                //   after: yesterday,
+                //   before: oneMonthBeforeToday,
+                // }}
                 selected={dateRange?.to}
                 onSelect={(selected) => {
                   if (!selected) return;

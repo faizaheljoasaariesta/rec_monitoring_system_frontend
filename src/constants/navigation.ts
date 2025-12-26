@@ -30,19 +30,19 @@ export const navigation = {
       isActive: true,
       items: [
         {
-          title: "Air Pressure",
+          title: "ALT",
           url: "/airreport",
         },
         {
-          title: "Auto Trimming",
+          title: "AHM",
           url: "/atreport",
         },
         {
-          title: "Digital Camera",
+          title: "DC",
           url: "/dcreport",
         },
         {
-          title: "Screw Locking (LOCK)",
+          title: "AS",
           url: "/asreport",
         },
       ],

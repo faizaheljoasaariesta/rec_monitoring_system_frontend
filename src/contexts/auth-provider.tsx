@@ -65,12 +65,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (err) {
       console.error('Logout error:', err);
-      toast.error('Gagal logout');
+      toast.error('Logout failed');
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setAuth(defaultAuthState);
-      toast.success('Logout berhasil');
+      toast.success('Logout successfully');
     }
   };
 
